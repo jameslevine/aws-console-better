@@ -32,18 +32,18 @@
 
 | Feature | Priority | Status | Description |
 |---------|----------|--------|-------------|
-| User Authentication | P0 | 🔴 Not Started | Cognito-based register/login/forgot password for extension users |
-| AWS Account Management | P0 | 🔴 Not Started | Add/edit/delete AWS accounts with encrypted credential storage (Access Key, Secret Key, Session Token). Multi-account support. |
-| Service Context Detection | P0 | 🔴 Not Started | Auto-detect which AWS service/resource the user is viewing based on URL and DOM |
-| Quick Copy Toolbar | P0 | 🔴 Not Started | Floating toolbar: one-click copy ARN, Resource ID, Region, Account ID, Endpoint URL, Resource Name |
-| "Show as CLI" Command | P0 | 🔴 Not Started | Show the equivalent AWS CLI command for the current resource. One-click copy. |
+| User Authentication | P0 | 🟡 In Progress | Cognito-based register/login/forgot password for extension users. Routes scaffolded, Cognito middleware implemented. |
+| AWS Account Management | P0 | 🟡 In Progress | Add/edit/delete AWS accounts with encrypted credential storage (Access Key, Secret Key, Session Token). Multi-account support. Routes scaffolded. |
+| Service Context Detection | P0 | 🟡 In Progress | Auto-detect which AWS service/resource the user is viewing based on URL and DOM. Detector implemented for 6 services. |
+| Quick Copy Toolbar | P0 | 🟡 In Progress | Floating toolbar: one-click copy ARN, Resource ID, Region, Account ID, Endpoint URL, Resource Name. Content script implemented. |
+| "Show as CLI" Command | P0 | 🟡 In Progress | Show the equivalent AWS CLI command for the current resource. One-click copy. CLI generator implemented for 6 services. |
 | Cross-Region Resource View | P0 | 🔴 Not Started | Side panel showing the same resource type across all regions |
 | Copy Resource to Region | P0 | 🔴 Not Started | Select a resource → choose target region → replicate config |
-| Quick Actions (Context-Aware) | P0 | 🔴 Not Started | Service-specific action buttons injected into the console |
-| Action/Command History | P0 | 🔴 Not Started | Searchable log of all actions performed through the extension |
-| Extension Side Panel | P0 | 🔴 Not Started | Persistent side panel housing the main UI for actions, views, and management |
-| Extension Popup | P0 | 🔴 Not Started | Quick access popup for account switching, settings, and shortcuts |
-| Settings & Preferences | P0 | 🔴 Not Started | User preferences: default region, theme, keyboard shortcuts, notifications |
+| Quick Actions (Context-Aware) | P0 | 🟡 In Progress | Service-specific action buttons injected into the console. Toolbar buttons scaffolded. |
+| Action/Command History | P0 | 🟡 In Progress | Searchable log of all actions performed through the extension. Route and UI tab scaffolded. |
+| Extension Side Panel | P0 | 🟢 Complete | Persistent side panel housing the main UI for actions, views, and management. Tabbed UI with context, actions, history, settings. |
+| Extension Popup | P0 | 🟢 Complete | Quick access popup for account switching, settings, and shortcuts. Auth state, quick actions, account display. |
+| Settings & Preferences | P0 | 🟡 In Progress | User preferences: default region, theme, keyboard shortcuts, notifications. UI scaffolded in side panel. |
 
 ### Phase 1 AWS Services
 
@@ -486,3 +486,9 @@
 |------|------|-------|
 | 2026-03-09 | Project planning and requirements gathering | Architecture and feature list defined |
 | 2026-03-09 | Documentation created | All 6 docs/ files created |
+| 2026-03-09 | Monorepo initialized | Git repo with extension/, backend/, infrastructure/ directories |
+| 2026-03-09 | Extension project scaffolded | Vite + CRXJS + React 18 + TypeScript + Tailwind CSS. Manifest V3. |
+| 2026-03-09 | Extension shell built | Background service worker, content script with context detection for 6 services, popup with auth/quick actions, side panel with 4 tabs |
+| 2026-03-09 | Backend project scaffolded | Express + TypeScript + serverless-http. AWS SDK v3 clients installed. |
+| 2026-03-09 | Backend shell built | Cognito auth middleware, Joi validation, error handler. Routes for auth, accounts, users, history, and 6 AWS services (EC2, S3, Lambda, DynamoDB, IAM, CloudFormation) |
+| 2026-03-09 | Infrastructure template created | SAM template with Cognito, KMS, 4 DynamoDB tables, Lambda + API Gateway, CloudWatch |
