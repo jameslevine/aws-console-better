@@ -1,0 +1,30 @@
+{
+  "name": "aws-console-better",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AWS Console Better — Chrome Extension that augments the AWS Management Console",
+  "scripts": {
+    "lint": "npm run lint --prefix extension && npm run lint --prefix backend",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.3.0"
+  },
+  "lint-staged": {
+    "extension/src/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "backend/src/**/*.ts": [
+      "prettier --write"
+    ],
+    "**/*.{json,md,yaml,yml,css}": [
+      "prettier --write"
+    ]
+  }
+}

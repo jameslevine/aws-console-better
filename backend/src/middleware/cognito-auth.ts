@@ -21,17 +21,11 @@ const verifier = CognitoJwtVerifier.create({
   clientId: process.env.COGNITO_CLIENT_ID!,
 });
 
-export const cognitoAuthMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const cognitoAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "No token provided", code: "UNAUTHORIZED" });
+      return res.status(401).json({ message: "No token provided", code: "UNAUTHORIZED" });
     }
 
     const payload = await verifier.verify(token);

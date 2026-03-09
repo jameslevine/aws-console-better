@@ -23,25 +23,19 @@ export function App() {
 
   useEffect(() => {
     // Get current page context
-    chrome.runtime.sendMessage(
-      { type: MessageType.GET_PAGE_CONTEXT },
-      (response) => {
-        if (response?.success) {
-          setPageContext(response.data);
-        }
-      },
-    );
+    chrome.runtime.sendMessage({ type: MessageType.GET_PAGE_CONTEXT }, (response) => {
+      if (response?.success) {
+        setPageContext(response.data);
+      }
+    });
 
     // Listen for tab updates
     const handleTabUpdate = () => {
-      chrome.runtime.sendMessage(
-        { type: MessageType.GET_PAGE_CONTEXT },
-        (response) => {
-          if (response?.success) {
-            setPageContext(response.data);
-          }
-        },
-      );
+      chrome.runtime.sendMessage({ type: MessageType.GET_PAGE_CONTEXT }, (response) => {
+        if (response?.success) {
+          setPageContext(response.data);
+        }
+      });
     };
 
     chrome.tabs.onUpdated.addListener(handleTabUpdate);
@@ -95,23 +89,16 @@ export function App() {
 /**
  * Context Tab — Shows current AWS page context
  */
-function ContextTab({
-  pageContext,
-}: {
-  pageContext: { url: string; title: string } | null;
-}) {
+function ContextTab({ pageContext }: { pageContext: { url: string; title: string } | null }) {
   const isAwsConsole = pageContext?.url?.includes("console.aws.amazon.com");
 
   if (!pageContext || !isAwsConsole) {
     return (
       <div className="flex flex-col items-center gap-3 pt-12 text-center">
         <span className="text-4xl">🌐</span>
-        <h2 className="text-base font-semibold text-gray-900">
-          Navigate to AWS Console
-        </h2>
+        <h2 className="text-base font-semibold text-gray-900">Navigate to AWS Console</h2>
         <p className="text-sm text-gray-500">
-          Open the AWS Management Console to see context-aware features and
-          quick actions.
+          Open the AWS Management Console to see context-aware features and quick actions.
         </p>
         <a
           href="https://console.aws.amazon.com"
@@ -128,23 +115,15 @@ function ContextTab({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-gray-900">
-          Current Page
-        </h2>
+        <h2 className="mb-2 text-sm font-semibold text-gray-900">Current Page</h2>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-          <p className="text-sm font-medium text-gray-900">
-            {pageContext.title || "AWS Console"}
-          </p>
-          <p className="mt-1 truncate text-xs text-gray-500">
-            {pageContext.url}
-          </p>
+          <p className="text-sm font-medium text-gray-900">{pageContext.title || "AWS Console"}</p>
+          <p className="mt-1 truncate text-xs text-gray-500">{pageContext.url}</p>
         </div>
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-gray-900">
-          Quick Actions
-        </h2>
+        <h2 className="mb-2 text-sm font-semibold text-gray-900">Quick Actions</h2>
         <div className="flex flex-col gap-2">
           <button className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50">
             <span>🌍</span>
@@ -240,34 +219,22 @@ function SettingsTab() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-gray-900">
-          AWS Accounts
-        </h2>
+        <h2 className="mb-2 text-sm font-semibold text-gray-900">AWS Accounts</h2>
         <button className="w-full rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 transition-colors hover:border-[#ff9900] hover:text-[#ff9900]">
           + Add AWS Account
         </button>
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-gray-900">
-          Preferences
-        </h2>
+        <h2 className="mb-2 text-sm font-semibold text-gray-900">Preferences</h2>
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
             <span className="text-sm text-gray-700">Show Toolbar</span>
-            <input
-              type="checkbox"
-              defaultChecked
-              className="accent-[#ff9900]"
-            />
+            <input type="checkbox" defaultChecked className="accent-[#ff9900]" />
           </div>
           <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
             <span className="text-sm text-gray-700">Keyboard Shortcuts</span>
-            <input
-              type="checkbox"
-              defaultChecked
-              className="accent-[#ff9900]"
-            />
+            <input type="checkbox" defaultChecked className="accent-[#ff9900]" />
           </div>
         </div>
       </div>
@@ -279,9 +246,7 @@ function SettingsTab() {
         </button>
       </div>
 
-      <p className="text-center text-xs text-gray-400">
-        AWS Console Better v0.1.0
-      </p>
+      <p className="text-center text-xs text-gray-400">AWS Console Better v0.1.0</p>
     </div>
   );
 }

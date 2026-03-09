@@ -87,21 +87,25 @@ AWS Console Better is a full-stack application consisting of three main componen
 **Responsibility**: Provide UI enhancements on AWS Console pages and communicate with the backend API for AWS operations.
 
 #### Content Scripts
+
 - **Injected into**: `*.console.aws.amazon.com/*`
 - **Purpose**: Detect current AWS service/resource, inject UI overlays (quick copy toolbar, action buttons, "Show as CLI" button)
 - **Client-side only**: Quick copy operations, context detection, UI rendering
 - **Communicates with**: Background service worker via Chrome messaging API
 
 #### Extension Popup
+
 - **Purpose**: Quick access panel for account switching, settings, and shortcuts
 - **Contains**: Login/register forms, AWS account selector, quick settings
 
 #### Side Panel
+
 - **Purpose**: Main UI for complex operations
 - **Contains**: Cross-region resource views, copy-to-region workflows, environment manager, action history, resource details
 - **Communicates with**: Background service worker for API calls
 
 #### Background Service Worker
+
 - **Purpose**: Central communication hub, manages auth state, makes API calls
 - **Contains**: API client (TanStack Query), auth token management, Chrome storage management
 - **Communicates with**: Backend API via HTTPS, content scripts and popup/sidepanel via Chrome messaging
@@ -111,20 +115,24 @@ AWS Console Better is a full-stack application consisting of three main componen
 **Responsibility**: Execute AWS SDK operations on behalf of users using their stored credentials. Manage user accounts, AWS credentials, and action history.
 
 #### Authentication Layer
+
 - Cognito JWT verification middleware
 - All endpoints require authentication (except register/login)
 
 #### AWS Client Factory
+
 - Creates AWS SDK v3 clients dynamically using stored user credentials
 - Supports temporary session tokens
 - Handles credential decryption from DynamoDB via KMS
 
 #### Service Controllers
+
 - One controller per AWS service (EC2, S3, Lambda, DynamoDB, IAM, CloudFormation, etc.)
 - Each controller exposes operations: list, describe, copy-to-region, quick actions
 - Controllers use the AWS Client Factory to create service-specific clients
 
 #### Account/Credential Management
+
 - CRUD operations for AWS accounts
 - Credentials encrypted with KMS before storage in DynamoDB
 - Support for multiple AWS accounts per user
@@ -134,21 +142,23 @@ AWS Console Better is a full-stack application consisting of three main componen
 **Responsibility**: Host and run all backend services using AWS serverless architecture.
 
 #### Services Used
-| Service | Purpose |
-|---------|---------|
-| **API Gateway (REST)** | HTTP endpoint for the backend API |
-| **Lambda** | Runs the Express monolith |
-| **DynamoDB** | Stores users, AWS accounts, history, preferences |
-| **Cognito User Pool** | User authentication for extension users |
-| **KMS** | Encrypts/decrypts stored AWS credentials |
-| **CloudWatch** | Logging and monitoring |
-| **SAM CLI** | Infrastructure as Code and deployment |
+
+| Service                | Purpose                                          |
+| ---------------------- | ------------------------------------------------ |
+| **API Gateway (REST)** | HTTP endpoint for the backend API                |
+| **Lambda**             | Runs the Express monolith                        |
+| **DynamoDB**           | Stores users, AWS accounts, history, preferences |
+| **Cognito User Pool**  | User authentication for extension users          |
+| **KMS**                | Encrypts/decrypts stored AWS credentials         |
+| **CloudWatch**         | Logging and monitoring                           |
+| **SAM CLI**            | Infrastructure as Code and deployment            |
 
 ---
 
 ## Data Flow
 
 ### Authentication Flow
+
 ```
 1. User opens extension popup → clicks "Register" or "Login"
 2. Extension sends credentials to POST /auth/register or POST /auth/login
@@ -159,6 +169,7 @@ AWS Console Better is a full-stack application consisting of three main componen
 ```
 
 ### AWS Account Setup Flow
+
 ```
 1. User navigates to Settings → AWS Accounts in extension
 2. User enters: Account Name, Access Key ID, Secret Access Key, (optional) Session Token, Default Region
@@ -170,6 +181,7 @@ AWS Console Better is a full-stack application consisting of three main componen
 ```
 
 ### AWS Operation Flow (e.g., "Copy S3 Bucket to Region")
+
 ```
 1. User is on S3 bucket page in AWS Console
 2. Content script detects: service=s3, resource=my-bucket, region=us-east-1
@@ -190,6 +202,7 @@ AWS Console Better is a full-stack application consisting of three main componen
 ```
 
 ### Client-Side Only Flow (e.g., "Quick Copy ARN")
+
 ```
 1. User is on any AWS resource page
 2. Content script detects resource identifiers from DOM/URL
@@ -203,31 +216,32 @@ AWS Console Better is a full-stack application consisting of three main componen
 
 ## Technology Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| **Extension** | Chrome Manifest V3 | Latest |
-| **Extension UI** | React 18 + TypeScript | 18.x |
-| **Extension Build** | Vite + CRXJS | Latest |
-| **Extension Styling** | Tailwind CSS | 3.x |
-| **Extension State** | Zustand | Latest |
-| **Extension Data Fetching** | TanStack Query | Latest |
-| **Backend Runtime** | Node.js + TypeScript | 20.x |
-| **Backend Framework** | Express | 4.x |
-| **Backend Validation** | Joi | Latest |
-| **AWS SDK** | AWS SDK for JavaScript v3 | Latest |
-| **Database** | DynamoDB | - |
-| **Auth** | Amazon Cognito | - |
-| **Encryption** | AWS KMS | - |
-| **IaC** | AWS SAM CLI + CloudFormation | Latest |
-| **Testing** | Jest + React Testing Library | Latest |
-| **Linting** | ESLint + Prettier | Latest |
-| **Commit Hooks** | Husky + commitlint | Latest |
+| Layer                       | Technology                   | Version |
+| --------------------------- | ---------------------------- | ------- |
+| **Extension**               | Chrome Manifest V3           | Latest  |
+| **Extension UI**            | React 18 + TypeScript        | 18.x    |
+| **Extension Build**         | Vite + CRXJS                 | Latest  |
+| **Extension Styling**       | Tailwind CSS                 | 3.x     |
+| **Extension State**         | Zustand                      | Latest  |
+| **Extension Data Fetching** | TanStack Query               | Latest  |
+| **Backend Runtime**         | Node.js + TypeScript         | 20.x    |
+| **Backend Framework**       | Express                      | 4.x     |
+| **Backend Validation**      | Joi                          | Latest  |
+| **AWS SDK**                 | AWS SDK for JavaScript v3    | Latest  |
+| **Database**                | DynamoDB                     | -       |
+| **Auth**                    | Amazon Cognito               | -       |
+| **Encryption**              | AWS KMS                      | -       |
+| **IaC**                     | AWS SAM CLI + CloudFormation | Latest  |
+| **Testing**                 | Jest + React Testing Library | Latest  |
+| **Linting**                 | ESLint + Prettier            | Latest  |
+| **Commit Hooks**            | Husky + commitlint           | Latest  |
 
 ---
 
 ## Security Considerations
 
 ### Credential Security
+
 - AWS credentials are **never stored in plaintext**
 - All credentials encrypted using AWS KMS before storage in DynamoDB
 - KMS key has restricted IAM policy (only the Lambda execution role can use it)
@@ -235,12 +249,14 @@ AWS Console Better is a full-stack application consisting of three main componen
 - No credentials are ever logged or included in error responses
 
 ### Authentication
+
 - Extension users authenticate via Cognito (JWT)
 - All API endpoints require valid JWT (except auth endpoints)
 - Tokens stored in `chrome.storage.local` (encrypted at rest by Chrome)
 - Refresh token rotation for session management
 
 ### API Security
+
 - HTTPS only (enforced by API Gateway)
 - CORS restricted to Chrome Extension origin
 - Rate limiting via API Gateway throttling
@@ -248,6 +264,7 @@ AWS Console Better is a full-stack application consisting of three main componen
 - No sensitive data in URL parameters
 
 ### Extension Security
+
 - Content Security Policy (CSP) in manifest.json
 - Minimal permissions requested (only `*.console.aws.amazon.com`)
 - No inline scripts or eval()
@@ -283,26 +300,26 @@ graph TD
 
 ## External Dependencies
 
-| Dependency | Purpose | Management |
-|-----------|---------|------------|
-| AWS SDK v3 | Execute AWS operations | npm, pinned versions |
-| React 18 | Extension UI framework | npm, pinned versions |
-| Vite + CRXJS | Extension build tool | npm, pinned versions |
-| Tailwind CSS | Styling | npm, pinned versions |
-| Zustand | State management | npm, pinned versions |
-| TanStack Query | Data fetching/caching | npm, pinned versions |
-| Express | Backend framework | npm, pinned versions |
-| Joi | Input validation | npm, pinned versions |
-| Chrome APIs | Extension functionality | Chrome Manifest V3 |
-| dayjs | Date utility | npm, pinned versions |
+| Dependency     | Purpose                 | Management           |
+| -------------- | ----------------------- | -------------------- |
+| AWS SDK v3     | Execute AWS operations  | npm, pinned versions |
+| React 18       | Extension UI framework  | npm, pinned versions |
+| Vite + CRXJS   | Extension build tool    | npm, pinned versions |
+| Tailwind CSS   | Styling                 | npm, pinned versions |
+| Zustand        | State management        | npm, pinned versions |
+| TanStack Query | Data fetching/caching   | npm, pinned versions |
+| Express        | Backend framework       | npm, pinned versions |
+| Joi            | Input validation        | npm, pinned versions |
+| Chrome APIs    | Extension functionality | Chrome Manifest V3   |
+| dayjs          | Date utility            | npm, pinned versions |
 
 ---
 
 ## Recent Significant Changes
 
-| Date | Change | Reason |
-|------|--------|--------|
-| 2026-03-09 | Initial architecture defined | Project kickoff |
+| Date       | Change                                                             | Reason                                                                      |
+| ---------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| 2026-03-09 | Initial architecture defined                                       | Project kickoff                                                             |
 | 2026-03-09 | Switched from client-side CLI terminal to backend API architecture | User requirement: backend should handle AWS operations, not client-side SDK |
 
 ---

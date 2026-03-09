@@ -69,8 +69,7 @@ const SERVICE_URL_PATTERNS: Record<
     urlPattern: /console\.aws\.amazon\.com\/dynamodb/,
     resourceExtractor: (url: URL) => {
       const tableMatch =
-        url.hash.match(/table\?name=([^&]+)/) ||
-        url.hash.match(/tables\/([^/?]+)/);
+        url.hash.match(/table\?name=([^&]+)/) || url.hash.match(/tables\/([^/?]+)/);
       if (tableMatch) {
         return {
           resourceType: "table",
@@ -105,9 +104,7 @@ const SERVICE_URL_PATTERNS: Record<
     service: "cloudformation",
     urlPattern: /console\.aws\.amazon\.com\/cloudformation/,
     resourceExtractor: (url: URL) => {
-      const stackMatch = url.hash.match(
-        /\/stacks\/stackinfo\?.*stackId=([^&]+)/,
-      );
+      const stackMatch = url.hash.match(/\/stacks\/stackinfo\?.*stackId=([^&]+)/);
       if (stackMatch) {
         return {
           resourceType: "stack",
@@ -128,9 +125,7 @@ function extractRegion(url: URL): string | null {
   if (regionParam) return regionParam;
 
   // Check subdomain (e.g., us-east-1.console.aws.amazon.com)
-  const subdomainMatch = url.hostname.match(
-    /^([a-z]{2}-[a-z]+-\d)\.console\.aws\.amazon\.com/,
-  );
+  const subdomainMatch = url.hostname.match(/^([a-z]{2}-[a-z]+-\d)\.console\.aws\.amazon\.com/);
   if (subdomainMatch) return subdomainMatch[1];
 
   return null;
@@ -141,9 +136,7 @@ function extractRegion(url: URL): string | null {
  */
 function extractAccountId(): string | null {
   // AWS Console typically shows account ID in the navigation bar
-  const accountElement = document.querySelector(
-    '[data-testid="account-detail-menu"]',
-  );
+  const accountElement = document.querySelector('[data-testid="account-detail-menu"]');
   if (accountElement?.textContent) {
     const accountMatch = accountElement.textContent.match(/(\d{12})/);
     if (accountMatch) return accountMatch[1];

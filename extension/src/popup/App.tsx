@@ -22,15 +22,12 @@ export function App() {
 
   useEffect(() => {
     // Check if user is authenticated
-    chrome.runtime.sendMessage(
-      { type: MessageType.GET_AUTH_TOKEN },
-      (response) => {
-        setAuth({
-          isAuthenticated: response?.success ?? false,
-          loading: false,
-        });
-      },
-    );
+    chrome.runtime.sendMessage({ type: MessageType.GET_AUTH_TOKEN }, (response) => {
+      setAuth({
+        isAuthenticated: response?.success ?? false,
+        loading: false,
+      });
+    });
   }, []);
 
   if (auth.loading) {
@@ -46,9 +43,7 @@ export function App() {
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-200 bg-[#232f3e] px-4 py-3">
         <span className="text-lg">⚡</span>
-        <h1 className="text-base font-semibold text-white">
-          AWS Console Better
-        </h1>
+        <h1 className="text-base font-semibold text-white">AWS Console Better</h1>
       </div>
 
       {/* Content */}
@@ -67,9 +62,7 @@ function UnauthenticatedView() {
     <div className="flex flex-col items-center gap-4 pt-8">
       <div className="text-center">
         <h2 className="text-lg font-semibold text-gray-900">Welcome</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Sign in to access AWS Console Better features
-        </p>
+        <p className="mt-1 text-sm text-gray-500">Sign in to access AWS Console Better features</p>
       </div>
 
       <button className="w-full rounded-lg bg-[#ff9900] px-4 py-2.5 text-sm font-semibold text-[#232f3e] transition-colors hover:bg-[#ec7211]">
@@ -80,9 +73,7 @@ function UnauthenticatedView() {
         Create Account
       </button>
 
-      <p className="text-xs text-gray-400">
-        Manage your AWS resources with superpowers
-      </p>
+      <p className="text-xs text-gray-400">Manage your AWS resources with superpowers</p>
     </div>
   );
 }
@@ -133,16 +124,12 @@ function AuthenticatedView() {
         </h3>
         <div className="rounded-lg border border-gray-200 px-3 py-2">
           <p className="text-sm font-medium text-gray-900">No account linked</p>
-          <p className="text-xs text-gray-500">
-            Add an AWS account in settings
-          </p>
+          <p className="text-xs text-gray-500">Add an AWS account in settings</p>
         </div>
       </div>
 
       {/* Settings */}
-      <button className="mt-2 text-center text-xs text-[#0073bb] hover:underline">
-        Settings
-      </button>
+      <button className="mt-2 text-center text-xs text-[#0073bb] hover:underline">Settings</button>
     </div>
   );
 }

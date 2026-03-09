@@ -17,17 +17,11 @@ import {
  */
 
 // Open side panel when extension icon is clicked (if popup is not shown)
-chrome.sidePanel
-  .setPanelBehavior({ openPanelOnActionClick: false })
-  .catch(console.error);
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(console.error);
 
 // Listen for messages from content scripts, popup, and side panel
 chrome.runtime.onMessage.addListener(
-  (
-    message: ExtensionMessage,
-    _sender,
-    sendResponse: (response: ExtensionResponse) => void,
-  ) => {
+  (message: ExtensionMessage, _sender, sendResponse: (response: ExtensionResponse) => void) => {
     handleMessage(message)
       .then(sendResponse)
       .catch((error) => {
@@ -42,10 +36,7 @@ chrome.runtime.onMessage.addListener(
 
 // Handle tab updates to detect AWS Console navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (
-    changeInfo.status === "complete" &&
-    tab.url?.includes("console.aws.amazon.com")
-  ) {
+  if (changeInfo.status === "complete" && tab.url?.includes("console.aws.amazon.com")) {
     // Enable side panel for AWS Console tabs
     chrome.sidePanel.setOptions({
       tabId,
@@ -58,9 +49,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 /**
  * Route messages to appropriate handlers
  */
-async function handleMessage(
-  message: ExtensionMessage,
-): Promise<ExtensionResponse> {
+async function handleMessage(message: ExtensionMessage): Promise<ExtensionResponse> {
   switch (message.type) {
     case MessageType.GET_AUTH_TOKEN:
       return handleGetAuthToken();
@@ -92,11 +81,7 @@ async function handleMessage(
  * Auth token management using chrome.storage.local
  */
 async function handleGetAuthToken(): Promise<ExtensionResponse> {
-  const result = await chrome.storage.local.get([
-    "accessToken",
-    "refreshToken",
-    "expiresAt",
-  ]);
+  const result = await chrome.storage.local.get(["accessToken", "refreshToken", "expiresAt"]);
   if (result.accessToken) {
     return {
       success: true,
@@ -125,11 +110,7 @@ async function handleSetAuthToken(payload: {
 }
 
 async function handleClearAuthToken(): Promise<ExtensionResponse> {
-  await chrome.storage.local.remove([
-    "accessToken",
-    "refreshToken",
-    "expiresAt",
-  ]);
+  await chrome.storage.local.remove(["accessToken", "refreshToken", "expiresAt"]);
   return { success: true };
 }
 
@@ -141,9 +122,7 @@ async function handleGetActiveAccount(): Promise<ExtensionResponse> {
   return { success: true, data: { accountId: result.activeAccountId || null } };
 }
 
-async function handleSetActiveAccount(payload: {
-  accountId: string;
-}): Promise<ExtensionResponse> {
+async function handleSetActiveAccount(payload: { accountId: string }): Promise<ExtensionResponse> {
   await chrome.storage.local.set({ activeAccountId: payload.accountId });
   return { success: true };
 }
@@ -164,8 +143,7 @@ async function handleApiRequest(payload: {
       return { success: false, error: "Not authenticated" };
     }
 
-    const baseUrl =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/v1";
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/v1";
     let url = `${baseUrl}${payload.path}`;
 
     if (payload.query) {

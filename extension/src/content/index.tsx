@@ -30,10 +30,7 @@ function copyToClipboard(text: string, label: string): void {
 /**
  * Show a toast notification on the page
  */
-function showToast(
-  message: string,
-  type: "success" | "error" | "info" = "info",
-): void {
+function showToast(message: string, type: "success" | "error" | "info" = "info"): void {
   // Remove existing toasts
   document.querySelectorAll(".acb-toast").forEach((el) => el.remove());
 
@@ -58,24 +55,16 @@ function createToolbar(context: AwsPageContext): HTMLElement {
   toolbar.id = "acb-toolbar";
 
   // Always show: Open Side Panel button
-  const sidePanelBtn = createToolbarButton(
-    "⚡ AWS Better",
-    "acb-btn-primary",
-    () => {
-      chrome.runtime.sendMessage({ type: "OPEN_SIDE_PANEL" });
-    },
-  );
+  const sidePanelBtn = createToolbarButton("⚡ AWS Better", "acb-btn-primary", () => {
+    chrome.runtime.sendMessage({ type: "OPEN_SIDE_PANEL" });
+  });
   toolbar.appendChild(sidePanelBtn);
 
   // Show copy buttons based on context
   if (context.region) {
-    const regionBtn = createToolbarButton(
-      `📋 Region: ${context.region}`,
-      "acb-btn-ghost",
-      () => {
-        copyToClipboard(context.region!, "region");
-      },
-    );
+    const regionBtn = createToolbarButton(`📋 Region: ${context.region}`, "acb-btn-ghost", () => {
+      copyToClipboard(context.region!, "region");
+    });
     toolbar.appendChild(regionBtn);
   }
 
@@ -84,10 +73,7 @@ function createToolbar(context: AwsPageContext): HTMLElement {
       `📋 ${context.resourceType}: ${truncate(context.resourceId, 20)}`,
       "acb-btn-ghost",
       () => {
-        copyToClipboard(
-          context.resourceId!,
-          context.resourceType || "resource ID",
-        );
+        copyToClipboard(context.resourceId!, context.resourceType || "resource ID");
       },
     );
     toolbar.appendChild(resourceBtn);
@@ -95,19 +81,15 @@ function createToolbar(context: AwsPageContext): HTMLElement {
 
   if (context.service && context.resourceId) {
     // Show "Copy to Region" button for specific resources
-    const copyRegionBtn = createToolbarButton(
-      "🌍 Copy to Region",
-      "acb-btn-secondary",
-      () => {
-        chrome.runtime.sendMessage({
-          type: "OPEN_SIDE_PANEL",
-          payload: {
-            action: "copy-to-region",
-            context,
-          },
-        });
-      },
-    );
+    const copyRegionBtn = createToolbarButton("🌍 Copy to Region", "acb-btn-secondary", () => {
+      chrome.runtime.sendMessage({
+        type: "OPEN_SIDE_PANEL",
+        payload: {
+          action: "copy-to-region",
+          context,
+        },
+      });
+    });
     toolbar.appendChild(copyRegionBtn);
 
     // Show "Show CLI" button

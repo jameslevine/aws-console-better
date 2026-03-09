@@ -13,25 +13,16 @@ router.get("/functions/:functionName", async (_req: Request, res: Response) => {
 });
 
 // POST /v1/aws/:accountId/lambda/functions/:functionName/invoke
-router.post(
-  "/functions/:functionName/invoke",
-  async (_req: Request, res: Response) => {
-    res.status(501).json({ message: "Not implemented yet" });
-  },
-);
+router.post("/functions/:functionName/invoke", async (_req: Request, res: Response) => {
+  res.status(501).json({ message: "Not implemented yet" });
+});
 
 // POST /v1/aws/:accountId/lambda/functions/:functionName/copy-to-region
-router.post(
-  "/functions/:functionName/copy-to-region",
-  async (_req: Request, res: Response) => {
-    res.status(501).json({ message: "Not implemented yet" });
-  },
-);
+router.post("/functions/:functionName/copy-to-region", async (_req: Request, res: Response) => {
+  res.status(501).json({ message: "Not implemented yet" });
+});
 
 // GET /v1/aws/:accountId/lambda/functions/:functionName/logs
-router.get(
-  "/functions/:functionName/logs",
-  async (_req: Request, res: Response) => {
-    res.status(501).json({ message: "Not implemented yet" });
-  },
-);
+router.get("/functions/:functionName/logs", async (_req: Request, res: Response) => {
+  res.status(501).json({ message: "Not implemented yet" });
+});

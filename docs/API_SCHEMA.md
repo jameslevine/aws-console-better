@@ -31,16 +31,16 @@ Development: http://localhost:3000
 
 ### Standard Error Codes
 
-| HTTP Status | Code | Description |
-|-------------|------|-------------|
-| 400 | `VALIDATION_ERROR` | Invalid request parameters |
-| 401 | `UNAUTHORIZED` | Missing or invalid token |
-| 403 | `FORBIDDEN` | Insufficient permissions |
-| 404 | `NOT_FOUND` | Resource not found |
-| 409 | `CONFLICT` | Resource already exists |
-| 429 | `RATE_LIMITED` | Too many requests |
-| 500 | `INTERNAL_ERROR` | Server error |
-| 502 | `AWS_ERROR` | Error from user's AWS account |
+| HTTP Status | Code               | Description                   |
+| ----------- | ------------------ | ----------------------------- |
+| 400         | `VALIDATION_ERROR` | Invalid request parameters    |
+| 401         | `UNAUTHORIZED`     | Missing or invalid token      |
+| 403         | `FORBIDDEN`        | Insufficient permissions      |
+| 404         | `NOT_FOUND`        | Resource not found            |
+| 409         | `CONFLICT`         | Resource already exists       |
+| 429         | `RATE_LIMITED`     | Too many requests             |
+| 500         | `INTERNAL_ERROR`   | Server error                  |
+| 502         | `AWS_ERROR`        | Error from user's AWS account |
 
 ## Rate Limiting
 
@@ -62,6 +62,7 @@ Development: http://localhost:3000
 Register a new user.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -72,6 +73,7 @@ Register a new user.
 ```
 
 **Response (201):**
+
 ```json
 {
   "message": "User registered successfully. Please verify your email.",
@@ -84,6 +86,7 @@ Register a new user.
 Verify email with confirmation code.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -92,6 +95,7 @@ Verify email with confirmation code.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Email verified successfully"
@@ -103,6 +107,7 @@ Verify email with confirmation code.
 Authenticate user and receive tokens.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -111,6 +116,7 @@ Authenticate user and receive tokens.
 ```
 
 **Response (200):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIs...",
@@ -125,6 +131,7 @@ Authenticate user and receive tokens.
 Refresh access token.
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "eyJjdHkiOiJKV1QiLCJl..."
@@ -132,6 +139,7 @@ Refresh access token.
 ```
 
 **Response (200):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIs...",
@@ -144,6 +152,7 @@ Refresh access token.
 Initiate password reset.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com"
@@ -151,6 +160,7 @@ Initiate password reset.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Password reset code sent to email"
@@ -162,6 +172,7 @@ Initiate password reset.
 Reset password with confirmation code.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -171,6 +182,7 @@ Reset password with confirmation code.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Password reset successfully"
@@ -186,6 +198,7 @@ Reset password with confirmation code.
 Get current user profile.
 
 **Response (200):**
+
 ```json
 {
   "userId": "usr_abc123",
@@ -206,6 +219,7 @@ Get current user profile.
 Update user profile.
 
 **Request Body:**
+
 ```json
 {
   "firstName": "John",
@@ -218,6 +232,7 @@ Update user profile.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Profile updated successfully"
@@ -233,6 +248,7 @@ Update user profile.
 List all AWS accounts for the current user.
 
 **Response (200):**
+
 ```json
 {
   "accounts": [
@@ -263,6 +279,7 @@ List all AWS accounts for the current user.
 Add a new AWS account.
 
 **Request Body:**
+
 ```json
 {
   "accountName": "Production",
@@ -275,6 +292,7 @@ Add a new AWS account.
 ```
 
 **Response (201):**
+
 ```json
 {
   "accountId": "acc_abc123",
@@ -290,6 +308,7 @@ Add a new AWS account.
 Get a specific AWS account.
 
 **Response (200):**
+
 ```json
 {
   "accountId": "acc_abc123",
@@ -307,6 +326,7 @@ Get a specific AWS account.
 Update an AWS account (name, default region, credentials).
 
 **Request Body:**
+
 ```json
 {
   "accountName": "Production (Updated)",
@@ -317,6 +337,7 @@ Update an AWS account (name, default region, credentials).
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "AWS account updated successfully"
@@ -328,6 +349,7 @@ Update an AWS account (name, default region, credentials).
 Delete an AWS account and its stored credentials.
 
 **Response (200):**
+
 ```json
 {
   "message": "AWS account deleted successfully"
@@ -339,6 +361,7 @@ Delete an AWS account and its stored credentials.
 Verify that stored credentials are valid by calling STS GetCallerIdentity.
 
 **Response (200):**
+
 ```json
 {
   "valid": true,
@@ -366,6 +389,7 @@ Get action history for the current user.
 | `action` | string | No | Filter by action type |
 
 **Response (200):**
+
 ```json
 {
   "history": [
@@ -394,6 +418,7 @@ Get action history for the current user.
 ### AWS Service Endpoints
 
 All AWS service endpoints follow this pattern:
+
 ```
 /v1/aws/:accountId/:service/...
 ```
@@ -415,6 +440,7 @@ List EC2 instances.
 | `allRegions` | boolean | No | If true, fetch from all regions |
 
 **Response (200):**
+
 ```json
 {
   "instances": [
@@ -446,6 +472,7 @@ Get detailed instance information.
 | `region` | string | Yes | AWS region |
 
 **Response (200):**
+
 ```json
 {
   "instanceId": "i-0abc123def456",
@@ -475,6 +502,7 @@ Get detailed instance information.
 Start an EC2 instance.
 
 **Request Body:**
+
 ```json
 {
   "region": "us-east-1"
@@ -482,6 +510,7 @@ Start an EC2 instance.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Instance start initiated",
@@ -495,6 +524,7 @@ Start an EC2 instance.
 Stop an EC2 instance.
 
 **Request Body:**
+
 ```json
 {
   "region": "us-east-1"
@@ -502,6 +532,7 @@ Stop an EC2 instance.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Instance stop initiated",
@@ -515,6 +546,7 @@ Stop an EC2 instance.
 Reboot an EC2 instance.
 
 **Request Body:**
+
 ```json
 {
   "region": "us-east-1"
@@ -522,6 +554,7 @@ Reboot an EC2 instance.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Instance reboot initiated"
@@ -533,6 +566,7 @@ Reboot an EC2 instance.
 Copy instance configuration to another region.
 
 **Request Body:**
+
 ```json
 {
   "sourceRegion": "us-east-1",
@@ -543,6 +577,7 @@ Copy instance configuration to another region.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Instance configuration copied to eu-west-1",
@@ -561,6 +596,7 @@ Generate SSH command for an instance.
 | `region` | string | Yes | AWS region |
 
 **Response (200):**
+
 ```json
 {
   "command": "ssh -i ~/.ssh/my-key-pair.pem ec2-user@54.123.45.67",
@@ -581,6 +617,7 @@ List security groups.
 | `allRegions` | boolean | No | Fetch from all regions |
 
 **Response (200):**
+
 ```json
 {
   "securityGroups": [
@@ -602,6 +639,7 @@ List security groups.
 Copy security group to another region.
 
 **Request Body:**
+
 ```json
 {
   "sourceRegion": "us-east-1",
@@ -611,6 +649,7 @@ Copy security group to another region.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Security group copied to eu-west-1",
@@ -627,6 +666,7 @@ Copy security group to another region.
 List all S3 buckets.
 
 **Response (200):**
+
 ```json
 {
   "buckets": [
@@ -647,6 +687,7 @@ List all S3 buckets.
 Get detailed bucket information.
 
 **Response (200):**
+
 ```json
 {
   "name": "my-app-assets",
@@ -668,6 +709,7 @@ Get detailed bucket information.
 Copy bucket configuration to another region (creates new bucket with same config).
 
 **Request Body:**
+
 ```json
 {
   "targetRegion": "eu-west-1",
@@ -680,6 +722,7 @@ Copy bucket configuration to another region (creates new bucket with same config
 ```
 
 **Response (201):**
+
 ```json
 {
   "message": "Bucket configuration copied to eu-west-1",
@@ -693,6 +736,7 @@ Copy bucket configuration to another region (creates new bucket with same config
 Get bucket policy.
 
 **Response (200):**
+
 ```json
 {
   "policy": { ... },
@@ -711,6 +755,7 @@ Generate S3 sync command.
 | `direction` | string | No | "upload" or "download" (default: "download") |
 
 **Response (200):**
+
 ```json
 {
   "command": "aws s3 sync s3://my-app-assets . --region us-east-1"
@@ -732,6 +777,7 @@ List Lambda functions.
 | `allRegions` | boolean | No | Fetch from all regions |
 
 **Response (200):**
+
 ```json
 {
   "functions": [
@@ -761,6 +807,7 @@ Get detailed function information.
 | `region` | string | Yes | AWS region |
 
 **Response (200):**
+
 ```json
 {
   "functionName": "my-api-handler",
@@ -789,6 +836,7 @@ Get detailed function information.
 Invoke a Lambda function.
 
 **Request Body:**
+
 ```json
 {
   "region": "us-east-1",
@@ -798,6 +846,7 @@ Invoke a Lambda function.
 ```
 
 **Response (200):**
+
 ```json
 {
   "statusCode": 200,
@@ -812,6 +861,7 @@ Invoke a Lambda function.
 Copy function to another region.
 
 **Request Body:**
+
 ```json
 {
   "sourceRegion": "us-east-1",
@@ -822,6 +872,7 @@ Copy function to another region.
 ```
 
 **Response (201):**
+
 ```json
 {
   "message": "Function copied to eu-west-1",
@@ -840,6 +891,7 @@ Get recent invocation logs.
 | `limit` | number | No | Number of log events (default: 50) |
 
 **Response (200):**
+
 ```json
 {
   "logEvents": [
@@ -867,6 +919,7 @@ List DynamoDB tables.
 | `allRegions` | boolean | No | Fetch from all regions |
 
 **Response (200):**
+
 ```json
 {
   "tables": [
@@ -896,6 +949,7 @@ Get detailed table information.
 | `region` | string | Yes | AWS region |
 
 **Response (200):**
+
 ```json
 {
   "tableName": "users-table",
@@ -920,6 +974,7 @@ Get detailed table information.
 Copy table schema to another region.
 
 **Request Body:**
+
 ```json
 {
   "sourceRegion": "us-east-1",
@@ -930,6 +985,7 @@ Copy table schema to another region.
 ```
 
 **Response (201):**
+
 ```json
 {
   "message": "Table schema copied to eu-west-1",
@@ -942,6 +998,7 @@ Copy table schema to another region.
 Execute a query on a DynamoDB table.
 
 **Request Body:**
+
 ```json
 {
   "region": "us-east-1",
@@ -952,6 +1009,7 @@ Execute a query on a DynamoDB table.
 ```
 
 **Response (200):**
+
 ```json
 {
   "items": [...],
@@ -976,6 +1034,7 @@ List IAM roles.
 | `search` | string | No | Filter by role name |
 
 **Response (200):**
+
 ```json
 {
   "roles": [
@@ -995,6 +1054,7 @@ List IAM roles.
 Get detailed role information.
 
 **Response (200):**
+
 ```json
 {
   "roleName": "lambda-execution-role",
@@ -1023,6 +1083,7 @@ List IAM policies.
 | `search` | string | No | Filter by policy name |
 
 **Response (200):**
+
 ```json
 {
   "policies": [
@@ -1042,6 +1103,7 @@ List IAM policies.
 Get policy document.
 
 **Response (200):**
+
 ```json
 {
   "policyName": "my-custom-policy",
@@ -1069,6 +1131,7 @@ List CloudFormation stacks.
 | `allRegions` | boolean | No | Fetch from all regions |
 
 **Response (200):**
+
 ```json
 {
   "stacks": [
@@ -1095,6 +1158,7 @@ Get detailed stack information.
 | `region` | string | Yes | AWS region |
 
 **Response (200):**
+
 ```json
 {
   "stackName": "my-app-stack",
@@ -1119,6 +1183,7 @@ Get stack template.
 | `region` | string | Yes | AWS region |
 
 **Response (200):**
+
 ```json
 {
   "templateBody": "AWSTemplateFormatVersion: '2010-09-09'...",
@@ -1131,18 +1196,18 @@ Get stack template.
 Deploy stack template to another region.
 
 **Request Body:**
+
 ```json
 {
   "sourceRegion": "us-east-1",
   "targetRegion": "eu-west-1",
   "targetStackName": "my-app-stack",
-  "parameters": [
-    { "ParameterKey": "Environment", "ParameterValue": "staging" }
-  ]
+  "parameters": [{ "ParameterKey": "Environment", "ParameterValue": "staging" }]
 }
 ```
 
 **Response (201):**
+
 ```json
 {
   "message": "Stack deployment initiated in eu-west-1",
@@ -1155,6 +1220,7 @@ Deploy stack template to another region.
 Rollback a stack to previous version.
 
 **Request Body:**
+
 ```json
 {
   "region": "us-east-1"
@@ -1162,6 +1228,7 @@ Rollback a stack to previous version.
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Stack rollback initiated",
@@ -1178,6 +1245,7 @@ Rollback a stack to previous version.
 List all available AWS regions.
 
 **Response (200):**
+
 ```json
 {
   "regions": [
@@ -1201,6 +1269,7 @@ Search resources across regions and services.
 | `tags` | string | No | Tag filter (key=value) |
 
 **Response (200):**
+
 ```json
 {
   "results": [
@@ -1227,6 +1296,7 @@ Search resources across regions and services.
 List user's bookmarked resources.
 
 **Response (200):**
+
 ```json
 {
   "bookmarks": [
@@ -1250,6 +1320,7 @@ List user's bookmarked resources.
 Add a bookmark.
 
 **Request Body:**
+
 ```json
 {
   "accountId": "acc_abc123",
@@ -1263,6 +1334,7 @@ Add a bookmark.
 ```
 
 **Response (201):**
+
 ```json
 {
   "bookmarkId": "bm_abc123",
@@ -1275,6 +1347,7 @@ Add a bookmark.
 Remove a bookmark.
 
 **Response (200):**
+
 ```json
 {
   "message": "Bookmark removed"
