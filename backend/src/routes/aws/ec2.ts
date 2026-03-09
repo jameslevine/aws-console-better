@@ -1,49 +1,34 @@
-import { Request, Response, Router } from "express";
+import {
+  describeInstance,
+  getSshCommand,
+  listInstances,
+  listSecurityGroups,
+  rebootInstance,
+  startInstance,
+  stopInstance,
+} from "../../controllers/ec2";
+
+import { Router } from "express";
 
 export const router = Router({ mergeParams: true });
 
 // GET /v1/aws/:accountId/ec2/instances
-router.get("/instances", async (_req: Request, res: Response) => {
-  // TODO: List EC2 instances using stored credentials
-  res.json({ instances: [], regions: [] });
-});
+router.get("/instances", listInstances);
 
 // GET /v1/aws/:accountId/ec2/instances/:instanceId
-router.get("/instances/:instanceId", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
+router.get("/instances/:instanceId", describeInstance);
 
 // POST /v1/aws/:accountId/ec2/instances/:instanceId/start
-router.post("/instances/:instanceId/start", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
+router.post("/instances/:instanceId/start", startInstance);
 
 // POST /v1/aws/:accountId/ec2/instances/:instanceId/stop
-router.post("/instances/:instanceId/stop", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
+router.post("/instances/:instanceId/stop", stopInstance);
 
 // POST /v1/aws/:accountId/ec2/instances/:instanceId/reboot
-router.post("/instances/:instanceId/reboot", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
-
-// POST /v1/aws/:accountId/ec2/instances/:instanceId/copy-to-region
-router.post("/instances/:instanceId/copy-to-region", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
+router.post("/instances/:instanceId/reboot", rebootInstance);
 
 // GET /v1/aws/:accountId/ec2/instances/:instanceId/ssh-command
-router.get("/instances/:instanceId/ssh-command", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
+router.get("/instances/:instanceId/ssh-command", getSshCommand);
 
 // GET /v1/aws/:accountId/ec2/security-groups
-router.get("/security-groups", async (_req: Request, res: Response) => {
-  res.json({ securityGroups: [] });
-});
-
-// POST /v1/aws/:accountId/ec2/security-groups/:groupId/copy-to-region
-router.post("/security-groups/:groupId/copy-to-region", async (_req: Request, res: Response) => {
-  res.status(501).json({ message: "Not implemented yet" });
-});
+router.get("/security-groups", listSecurityGroups);
