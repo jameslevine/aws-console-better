@@ -27,7 +27,6 @@
     {
       "matches": ["https://*.console.aws.amazon.com/*"],
       "js": ["src/content/index.tsx"],
-      "css": ["src/content/styles/content.css"],
       "run_at": "document_idle"
     }
   ],

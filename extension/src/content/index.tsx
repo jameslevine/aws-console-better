@@ -206,8 +206,35 @@ function updateToolbar(): void {
 /**
  * Initialize the content script
  */
+function injectStyles(): void {
+  const style = document.createElement("style");
+  style.id = "acb-styles";
+  style.textContent = `
+    .acb-toolbar { position:fixed; bottom:20px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:8px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+    .acb-btn { display:flex; align-items:center; gap:6px; padding:8px 12px; border:none; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s ease; box-shadow:0 2px 8px rgba(0,0,0,.15),0 0 1px rgba(0,0,0,.1); white-space:nowrap; }
+    .acb-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,.2),0 0 1px rgba(0,0,0,.1); }
+    .acb-btn:active { transform:translateY(0); }
+    .acb-btn-primary { background:#ff9900; color:#232f3e; }
+    .acb-btn-primary:hover { background:#ec7211; }
+    .acb-btn-secondary { background:#232f3e; color:#fff; }
+    .acb-btn-secondary:hover { background:#37475a; }
+    .acb-btn-ghost { background:rgba(255,255,255,.95); color:#232f3e; border:1px solid #d5dbdb; }
+    .acb-btn-ghost:hover { background:#fff; border-color:#879596; }
+    .acb-toast { position:fixed; top:20px; right:20px; z-index:999999; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:500; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; box-shadow:0 4px 12px rgba(0,0,0,.15); animation:acb-slide-in .2s ease-out; }
+    .acb-toast-success { background:#1d8102; color:#fff; }
+    .acb-toast-error { background:#d13212; color:#fff; }
+    .acb-toast-info { background:#0073bb; color:#fff; }
+    @keyframes acb-slide-in { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes acb-fade-out { from { opacity:1; } to { opacity:0; } }
+  `;
+  document.head.appendChild(style);
+}
+
 function init(): void {
   console.log("AWS Console Better — Content script loaded");
+
+  // Inject styles
+  injectStyles();
 
   // Initial context detection
   updateToolbar();
