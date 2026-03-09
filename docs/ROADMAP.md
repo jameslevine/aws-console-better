@@ -33,20 +33,20 @@
 
 ### Core Platform Features
 
-| Feature                       | Priority | Status         | Description                                                                                                                                       |
-| ----------------------------- | -------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| User Authentication           | P0       | 🟡 In Progress | Cognito-based register/login/forgot password for extension users. Routes scaffolded, Cognito middleware implemented.                              |
-| AWS Account Management        | P0       | 🟡 In Progress | Add/edit/delete AWS accounts with encrypted credential storage (Access Key, Secret Key, Session Token). Multi-account support. Routes scaffolded. |
-| Service Context Detection     | P0       | 🟡 In Progress | Auto-detect which AWS service/resource the user is viewing based on URL and DOM. Detector implemented for 6 services.                             |
-| Quick Copy Toolbar            | P0       | 🟡 In Progress | Floating toolbar: one-click copy ARN, Resource ID, Region, Account ID, Endpoint URL, Resource Name. Content script implemented.                   |
-| "Show as CLI" Command         | P0       | 🟡 In Progress | Show the equivalent AWS CLI command for the current resource. One-click copy. CLI generator implemented for 6 services.                           |
-| Cross-Region Resource View    | P0       | 🔴 Not Started | Side panel showing the same resource type across all regions                                                                                      |
-| Copy Resource to Region       | P0       | 🔴 Not Started | Select a resource → choose target region → replicate config                                                                                       |
-| Quick Actions (Context-Aware) | P0       | 🟡 In Progress | Service-specific action buttons injected into the console. Toolbar buttons scaffolded.                                                            |
-| Action/Command History        | P0       | 🟡 In Progress | Searchable log of all actions performed through the extension. Route and UI tab scaffolded.                                                       |
-| Extension Side Panel          | P0       | 🟢 Complete    | Persistent side panel housing the main UI for actions, views, and management. Tabbed UI with context, actions, history, settings.                 |
-| Extension Popup               | P0       | 🟢 Complete    | Quick access popup for account switching, settings, and shortcuts. Auth state, quick actions, account display.                                    |
-| Settings & Preferences        | P0       | 🟡 In Progress | User preferences: default region, theme, keyboard shortcuts, notifications. UI scaffolded in side panel.                                          |
+| Feature                       | Priority | Status         | Description                                                                                                                       |
+| ----------------------------- | -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| User Authentication           | P0       | 🟢 Complete    | Cognito-based register/login/verify/refresh/forgot/reset password. Full controller with error handling.                           |
+| AWS Account Management        | P0       | 🟢 Complete    | CRUD for AWS accounts with KMS-encrypted credentials. STS verification. Multi-account support. DynamoDB adapter.                  |
+| Service Context Detection     | P0       | 🟡 In Progress | Auto-detect which AWS service/resource the user is viewing based on URL and DOM. Detector implemented for 6 services.             |
+| Quick Copy Toolbar            | P0       | 🟡 In Progress | Floating toolbar: one-click copy ARN, Resource ID, Region, Account ID, Endpoint URL, Resource Name. Content script implemented.   |
+| "Show as CLI" Command         | P0       | 🟡 In Progress | Show the equivalent AWS CLI command for the current resource. One-click copy. CLI generator implemented for 6 services.           |
+| Cross-Region Resource View    | P0       | 🔴 Not Started | Side panel showing the same resource type across all regions                                                                      |
+| Copy Resource to Region       | P0       | 🔴 Not Started | Select a resource → choose target region → replicate config                                                                       |
+| Quick Actions (Context-Aware) | P0       | 🟡 In Progress | Service-specific action buttons injected into the console. Toolbar buttons scaffolded.                                            |
+| Action/Command History        | P0       | 🟡 In Progress | Searchable log of all actions performed through the extension. Route and UI tab scaffolded.                                       |
+| Extension Side Panel          | P0       | 🟢 Complete    | Persistent side panel housing the main UI for actions, views, and management. Tabbed UI with context, actions, history, settings. |
+| Extension Popup               | P0       | 🟢 Complete    | Quick access popup for account switching, settings, and shortcuts. Auth state, quick actions, account display.                    |
+| Settings & Preferences        | P0       | 🟡 In Progress | User preferences: default region, theme, keyboard shortcuts, notifications. UI scaffolded in side panel.                          |
 
 ### Phase 1 AWS Services
 
