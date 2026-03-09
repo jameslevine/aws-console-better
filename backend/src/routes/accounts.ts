@@ -1,39 +1,37 @@
-import { Request, Response, Router } from "express";
+import { accountParamsSchema, createAccountSchema, updateAccountSchema } from "../models/accounts";
+import {
+  createAccount,
+  deleteAccount,
+  getAccount,
+  listAccounts,
+  updateAccount,
+  verifyAccount,
+} from "../controllers/accounts";
+import { validateBody, validateParams } from "../middleware/validation";
+
+import { Router } from "express";
 
 export const router = Router();
 
-// GET /v1/accounts — List all AWS accounts for the current user
-router.get("/", async (_req: Request, res: Response) => {
-  // TODO: Implement list accounts
-  res.json({ accounts: [] });
-});
+// GET /v1/accounts
+router.get("/", listAccounts);
 
-// POST /v1/accounts — Add a new AWS account
-router.post("/", async (_req: Request, res: Response) => {
-  // TODO: Implement add account with KMS encryption
-  res.status(501).json({ message: "Not implemented yet" });
-});
+// POST /v1/accounts
+router.post("/", validateBody(createAccountSchema), createAccount);
 
-// GET /v1/accounts/:accountId — Get a specific AWS account
-router.get("/:accountId", async (_req: Request, res: Response) => {
-  // TODO: Implement get account
-  res.status(501).json({ message: "Not implemented yet" });
-});
+// GET /v1/accounts/:accountId
+router.get("/:accountId", validateParams(accountParamsSchema), getAccount);
 
-// PATCH /v1/accounts/:accountId — Update an AWS account
-router.patch("/:accountId", async (_req: Request, res: Response) => {
-  // TODO: Implement update account
-  res.status(501).json({ message: "Not implemented yet" });
-});
+// PATCH /v1/accounts/:accountId
+router.patch(
+  "/:accountId",
+  validateParams(accountParamsSchema),
+  validateBody(updateAccountSchema),
+  updateAccount,
+);
 
-// DELETE /v1/accounts/:accountId — Delete an AWS account
-router.delete("/:accountId", async (_req: Request, res: Response) => {
-  // TODO: Implement delete account
-  res.status(501).json({ message: "Not implemented yet" });
-});
+// DELETE /v1/accounts/:accountId
+router.delete("/:accountId", validateParams(accountParamsSchema), deleteAccount);
 
-// POST /v1/accounts/:accountId/verify — Verify credentials
-router.post("/:accountId/verify", async (_req: Request, res: Response) => {
-  // TODO: Implement credential verification via STS
-  res.status(501).json({ message: "Not implemented yet" });
-});
+// POST /v1/accounts/:accountId/verify
+router.post("/:accountId/verify", validateParams(accountParamsSchema), verifyAccount);
