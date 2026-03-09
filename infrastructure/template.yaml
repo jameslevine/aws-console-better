@@ -41,6 +41,8 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Sub aws-console-better-${Environment}
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
       AutoVerifiedAttributes:
         - email
       UsernameAttributes:
@@ -72,8 +74,10 @@ Resources:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
         - ALLOW_USER_SRP_AUTH
+        - ALLOW_CUSTOM_AUTH
       GenerateSecret: false
       PreventUserExistenceErrors: ENABLED
+      AllowedOAuthFlowsUserPoolClient: false
 
   # ============================================
   # KMS Key for Credential Encryption
