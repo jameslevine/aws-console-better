@@ -8,8 +8,8 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import crypto from "crypto";
 import dayjs from "dayjs";
-import { v4 as uuidv4 } from "uuid";
 
 const dynamodb = DynamoDBDocumentClient.from(
   new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" }),
@@ -47,7 +47,7 @@ export const createDbAccount = async (
     encryptedCredentials: string;
   },
 ): Promise<AwsAccountRecord> => {
-  const accountId = `acc_${uuidv4().replace(/-/g, "").substring(0, 12)}`;
+  const accountId = `acc_${crypto.randomUUID().replace(/-/g, "").substring(0, 12)}`;
   const now = dayjs().toISOString();
 
   const record: AwsAccountRecord = {

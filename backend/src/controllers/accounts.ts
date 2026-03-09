@@ -101,7 +101,7 @@ export const getAccount = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { accountId } = req.params;
+    const accountId = req.params.accountId as string;
     const account = await getDbAccountById(req.user.sub, accountId);
 
     if (!account) {
@@ -128,7 +128,7 @@ export const updateAccount = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { accountId } = req.params;
+    const accountId = req.params.accountId as string;
     const account = await getDbAccountById(req.user.sub, accountId);
 
     if (!account) {
@@ -186,7 +186,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { accountId } = req.params;
+    const accountId = req.params.accountId as string;
     const account = await getDbAccountById(req.user.sub, accountId);
 
     if (!account) {
@@ -212,7 +212,7 @@ export const verifyAccount = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { accountId } = req.params;
+    const accountId = req.params.accountId as string;
     const account = await getDbAccountById(req.user.sub, accountId);
 
     if (!account) {

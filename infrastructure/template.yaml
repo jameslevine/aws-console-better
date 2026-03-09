@@ -91,15 +91,6 @@ Resources:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Action: kms:*
             Resource: "*"
-          - Sid: AllowLambdaUse
-            Effect: Allow
-            Principal:
-              AWS: !GetAtt ApiLambdaRole.Arn
-            Action:
-              - kms:Encrypt
-              - kms:Decrypt
-              - kms:GenerateDataKey
-            Resource: "*"
 
   CredentialEncryptionKeyAlias:
     Type: AWS::KMS::Alias
