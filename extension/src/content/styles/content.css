@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+/**
+ * Content script styles — injected into AWS Console pages.
+ * All classes are prefixed with 'acb-' to avoid conflicts with AWS Console CSS.
+ */
+
+/* Floating toolbar container */
+.acb-toolbar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+/* Toolbar button base */
+.acb-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 0 1px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.acb-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.acb-btn:active {
+  transform: translateY(0);
+}
+
+/* Primary button (AWS orange) */
+.acb-btn-primary {
+  background: #ff9900;
+  color: #232f3e;
+}
+
+.acb-btn-primary:hover {
+  background: #ec7211;
+}
+
+/* Secondary button */
+.acb-btn-secondary {
+  background: #232f3e;
+  color: #ffffff;
+}
+
+.acb-btn-secondary:hover {
+  background: #37475a;
+}
+
+/* Ghost button */
+.acb-btn-ghost {
+  background: rgba(255, 255, 255, 0.95);
+  color: #232f3e;
+  border: 1px solid #d5dbdb;
+}
+
+.acb-btn-ghost:hover {
+  background: #ffffff;
+  border-color: #879596;
+}
+
+/* Toast notification */
+.acb-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999999;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: acb-slide-in 0.2s ease-out;
+}
+
+.acb-toast-success {
+  background: #1d8102;
+  color: #ffffff;
+}
+
+.acb-toast-error {
+  background: #d13212;
+  color: #ffffff;
+}
+
+.acb-toast-info {
+  background: #0073bb;
+  color: #ffffff;
+}
+
+@keyframes acb-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes acb-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Quick copy badge */
+.acb-copy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  margin-left: 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  background: rgba(0, 115, 187, 0.1);
+  color: #0073bb;
+  border: 1px solid rgba(0, 115, 187, 0.2);
+  transition: all 0.15s ease;
+}
+
+.acb-copy-badge:hover {
+  background: rgba(0, 115, 187, 0.2);
+  border-color: rgba(0, 115, 187, 0.4);
+}
+
+/* Context info bar */
+.acb-context-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: #232f3e;
+  color: #d5dbdb;
+  font-size: 12px;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  border-top: 2px solid #ff9900;
+}
+
+.acb-context-bar-label {
+  color: #879596;
+  font-weight: 500;
+}
+
+.acb-context-bar-value {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.acb-context-bar-separator {
+  color: #545b64;
+}

@@ -1,0 +1,298 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Console Better — Backend Infrastructure
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  CognitoDomainPrefix:
+    Type: String
+    Default: aws-console-better
+    Description: Cognito hosted UI domain prefix
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs20.x
+    MemorySize: 256
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        USERS_TABLE: !Ref UsersTable
+        ACCOUNTS_TABLE: !Ref AccountsTable
+        HISTORY_TABLE: !Ref HistoryTable
+        BOOKMARKS_TABLE: !Ref BookmarksTable
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPool
+        COGNITO_CLIENT_ID: !Ref CognitoUserPoolClient
+        KMS_KEY_ID: !GetAtt CredentialEncryptionKey.Arn
+
+Resources:
+  # ============================================
+  # Cognito User Pool
+  # ============================================
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub aws-console-better-${Environment}
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+        - Name: given_name
+          Required: false
+          Mutable: true
+        - Name: family_name
+          Required: false
+          Mutable: true
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub aws-console-better-client-${Environment}
+      UserPoolId: !Ref CognitoUserPool
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+
+  # ============================================
+  # KMS Key for Credential Encryption
+  # ============================================
+  CredentialEncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub Encryption key for AWS Console Better credentials (${Environment})
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowRootAccount
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: "*"
+          - Sid: AllowLambdaUse
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt ApiLambdaRole.Arn
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: "*"
+
+  CredentialEncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/aws-console-better-${Environment}
+      TargetKeyId: !Ref CredentialEncryptionKey
+
+  # ============================================
+  # DynamoDB Tables
+  # ============================================
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub aws-console-better-users-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  AccountsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub aws-console-better-accounts-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  HistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub aws-console-better-history-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  BookmarksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub aws-console-better-bookmarks-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # ============================================
+  # Lambda Function + API Gateway
+  # ============================================
+  ApiLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub aws-console-better-lambda-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt UsersTable.Arn
+                  - !GetAtt AccountsTable.Arn
+                  - !GetAtt HistoryTable.Arn
+                  - !GetAtt BookmarksTable.Arn
+                  - !Sub ${UsersTable.Arn}/index/*
+                  - !Sub ${AccountsTable.Arn}/index/*
+                  - !Sub ${HistoryTable.Arn}/index/*
+                  - !Sub ${BookmarksTable.Arn}/index/*
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt CredentialEncryptionKey.Arn
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub aws-console-better-api-${Environment}
+      Handler: dist/index.handler
+      CodeUri: ../backend/
+      Role: !GetAtt ApiLambdaRole.Arn
+      Events:
+        ApiProxy:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref ApiGateway
+        ApiRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId: !Ref ApiGateway
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub aws-console-better-api-${Environment}
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET,POST,PATCH,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        MaxAge: "'300'"
+
+  # ============================================
+  # CloudWatch Log Group
+  # ============================================
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/aws-console-better-api-${Environment}
+      RetentionInDays: 30
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+
+  CognitoClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref CognitoUserPoolClient
+
+  KmsKeyArn:
+    Description: KMS Key ARN for credential encryption
+    Value: !GetAtt CredentialEncryptionKey.Arn
+
+  UsersTableName:
+    Description: Users DynamoDB Table Name
+    Value: !Ref UsersTable
+
+  AccountsTableName:
+    Description: Accounts DynamoDB Table Name
+    Value: !Ref AccountsTable
