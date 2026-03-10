@@ -139,9 +139,10 @@ function createButton(
   className: string,
 ): HTMLButtonElement {
   const btn = doc.createElement("button");
-  btn.className = `acb-inline-btn ${className}`;
-  btn.textContent = icon;
+  btn.className = `acb-cs-btn ${className}`;
   btn.title = title;
+  btn.type = "button";
+  btn.innerHTML = `<span class="acb-cs-btn-icon">${icon === "⏹" ? "⏹" : "▶"}</span>`;
   return btn;
 }
 
@@ -230,30 +231,66 @@ function showToast(doc: Document, message: string, type: "success" | "error" | "
 
 function getStyles(): string {
   return `
-    .acb-inline-btn {
+    /* Cloudscape-style inline icon button */
+    .acb-cs-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
-      margin-left: 6px;
-      padding: 0;
-      border: 1px solid transparent;
-      border-radius: 4px;
-      background: transparent;
+      min-width: 0;
+      height: 30px;
+      padding: 0 8px;
+      margin-left: 8px;
+      border: 2px solid var(--color-border-button-normal-default, #7d8998);
+      border-radius: 20px;
+      background: var(--color-background-button-normal-default, transparent);
+      color: var(--color-text-button-normal-default, #0972d3);
       cursor: pointer;
+      font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+      letter-spacing: 0.25px;
+      vertical-align: middle;
+      transition: all 85ms linear;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .acb-cs-btn:hover {
+      background: var(--color-background-button-normal-hover, #f2f8fd);
+      border-color: var(--color-border-button-normal-hover, #033160);
+      color: var(--color-text-button-normal-hover, #033160);
+    }
+    .acb-cs-btn:active {
+      background: var(--color-background-button-normal-active, #d3e7f9);
+      border-color: var(--color-border-button-normal-active, #033160);
+    }
+    .acb-cs-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .acb-cs-btn-icon {
       font-size: 14px;
       line-height: 1;
-      vertical-align: middle;
-      transition: all 0.15s ease;
     }
-    .acb-inline-btn:hover {
-      background: rgba(0, 0, 0, 0.08);
-      border-color: rgba(0, 0, 0, 0.15);
+    .acb-stop-btn {
+      border-color: var(--color-text-status-error, #d91515);
+      color: var(--color-text-status-error, #d91515);
     }
-    .acb-inline-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .acb-stop-btn:hover { background: rgba(209, 50, 18, 0.1); }
-    .acb-start-btn:hover { background: rgba(29, 129, 2, 0.1); }
+    .acb-stop-btn:hover {
+      background: #fdf3f1;
+      border-color: #8b0000;
+      color: #8b0000;
+    }
+    .acb-start-btn {
+      border-color: var(--color-text-status-success, #037f0c);
+      color: var(--color-text-status-success, #037f0c);
+    }
+    .acb-start-btn:hover {
+      background: #f2f8f0;
+      border-color: #1a5c00;
+      color: #1a5c00;
+    }
   `;
 }
 
