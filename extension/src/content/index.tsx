@@ -1,72 +1,92 @@
 /**
  * AWS Console Better — Content Script
  *
- * Runs in both the main AWS Console frame AND inside EC2 iframes.
- * Injects features directly into the AWS Console UI.
+ * Runs in the main AWS Console frame.
+ * Accesses EC2 iframe content via contentDocument (same-origin).
  */
 
-const IS_TOP_FRAME = window === window.top;
 const ACB_MARKER = "acb-injected";
 
 if (document.documentElement.getAttribute(ACB_MARKER)) {
   // Already injected
 } else {
   document.documentElement.setAttribute(ACB_MARKER, "true");
-  init();
-}
 
-function init(): void {
-  if (IS_TOP_FRAME) {
-    console.log("AWS Console Better — Main frame loaded");
-    // Main frame: watch for hash changes to detect page navigation
-  } else {
-    console.log("AWS Console Better — Iframe loaded:", document.title);
-    // Only enhance iframes that look like EC2 content
-    waitForTable();
+  // Only run in the top frame
+  if (window === window.top) {
+    init();
   }
 }
 
-/**
- * Wait for the Cloudscape table to render inside the iframe,
- * then inject our enhancements.
- */
-function waitForTable(): void {
+function init(): void {
+  console.log("AWS Console Better — Content script loaded");
   injectStyles();
 
+  // Watch for the EC2 iframe to appear and enhance it
   const tryEnhance = () => {
-    // Look for table body rows
-    const rows = document.querySelectorAll("table tbody tr");
-    if (rows.length > 0) {
-      enhanceInstanceRows(rows);
+    // Try to access the compute-react-frame iframe (EC2 instances)
+    const iframe = document.getElementById("compute-react-frame") as HTMLIFrameElement | null;
+    if (iframe) {
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (iframeDoc && iframeDoc.body) {
+          enhanceIframeContent(iframeDoc);
+        }
+      } catch (e) {
+        // Cross-origin — can't access iframe content
+        console.log("AWS Console Better — Cannot access iframe (cross-origin):", e);
+      }
+    }
+
+    // Also try security-groups-react-frame
+    const sgIframe = document.getElementById(
+      "security-groups-react-frame",
+    ) as HTMLIFrameElement | null;
+    if (sgIframe) {
+      try {
+        const sgDoc = sgIframe.contentDocument || sgIframe.contentWindow?.document;
+        if (sgDoc && sgDoc.body) {
+          enhanceIframeContent(sgDoc);
+        }
+      } catch {
+        // Cross-origin
+      }
     }
   };
 
-  // Try immediately and on delays (table renders async)
-  tryEnhance();
-  setTimeout(tryEnhance, 1000);
-  setTimeout(tryEnhance, 2000);
-  setTimeout(tryEnhance, 4000);
+  // Try periodically (iframe content loads async)
+  setInterval(tryEnhance, 2000);
 
-  // Watch for DOM changes (table re-renders on filter, sort, pagination)
-  const observer = new MutationObserver(() => {
-    tryEnhance();
+  // Also watch for hash changes (page navigation)
+  window.addEventListener("hashchange", () => {
+    setTimeout(tryEnhance, 1000);
+    setTimeout(tryEnhance, 3000);
   });
-  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 /**
- * Add a stop button to each running instance row in the EC2 table.
+ * Enhance the content inside an EC2 iframe document.
  */
-function enhanceInstanceRows(rows: NodeListOf<Element>): void {
+function enhanceIframeContent(doc: Document): void {
+  // Inject styles into the iframe if not already done
+  if (!doc.getElementById("acb-styles")) {
+    const style = doc.createElement("style");
+    style.id = "acb-styles";
+    style.textContent = getStyles();
+    doc.head.appendChild(style);
+  }
+
+  // Find table rows
+  const rows = doc.querySelectorAll("table tbody tr");
+  if (rows.length === 0) return;
+
   rows.forEach((row) => {
     // Skip if already enhanced
-    if (row.querySelector(".acb-stop-btn")) return;
+    if (row.querySelector(".acb-stop-btn") || row.querySelector(".acb-start-btn")) return;
 
     const cells = row.querySelectorAll("td");
     if (cells.length < 3) return;
 
-    // Find the cell that contains the instance state
-    // Look for text content that indicates "Running" or "Stopped"
     let stateCell: HTMLElement | null = null;
     let isRunning = false;
     let isStopped = false;
@@ -75,128 +95,80 @@ function enhanceInstanceRows(rows: NodeListOf<Element>): void {
     cells.forEach((cell) => {
       const text = cell.textContent?.trim().toLowerCase() || "";
 
-      // Detect instance state
       if (text === "running" || text.includes("running")) {
-        stateCell = cell;
+        stateCell = cell as HTMLElement;
         isRunning = true;
       } else if (text === "stopped" || text.includes("stopped")) {
-        stateCell = cell;
+        stateCell = cell as HTMLElement;
         isStopped = true;
       }
 
-      // Detect instance ID (i-xxxxxxxxx)
       const idMatch = cell.textContent?.match(/i-[0-9a-f]{8,17}/);
       if (idMatch) {
         instanceId = idMatch[0];
       }
     });
 
-    // Only add buttons if we found a state and instance ID
     const targetCell = stateCell as HTMLElement | null;
     if (!targetCell || !instanceId) return;
 
     if (isRunning) {
-      const stopBtn = createActionButton("⏹", "Stop instance", "acb-stop-btn", () => {
-        handleStopInstance(instanceId, stopBtn);
+      const btn = createButton(doc, "⏹", "Stop instance", "acb-stop-btn");
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        handleAction(instanceId, "stop", btn, doc);
       });
-      targetCell.appendChild(stopBtn);
+      targetCell.appendChild(btn);
     } else if (isStopped) {
-      const startBtn = createActionButton("▶️", "Start instance", "acb-start-btn", () => {
-        handleStartInstance(instanceId, startBtn);
+      const btn = createButton(doc, "▶️", "Start instance", "acb-start-btn");
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        handleAction(instanceId, "start", btn, doc);
       });
-      targetCell.appendChild(startBtn);
+      targetCell.appendChild(btn);
     }
   });
 }
 
-/**
- * Create an inline action button that matches AWS Console styling.
- */
-function createActionButton(
+function createButton(
+  doc: Document,
   icon: string,
   title: string,
   className: string,
-  onClick: () => void,
 ): HTMLButtonElement {
-  const btn = document.createElement("button");
+  const btn = doc.createElement("button");
   btn.className = `acb-inline-btn ${className}`;
   btn.textContent = icon;
   btn.title = title;
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    onClick();
-  });
   return btn;
 }
 
-/**
- * Stop an EC2 instance via the backend API.
- */
-async function handleStopInstance(instanceId: string, btn: HTMLButtonElement): Promise<void> {
-  btn.textContent = "⏳";
-  btn.disabled = true;
-
-  try {
-    // Get auth token and account from chrome storage
-    const { accessToken, activeAccountId } = await getStoredAuth();
-    if (!accessToken || !activeAccountId) {
-      showToast("Sign in and add an AWS account first", "error");
-      btn.textContent = "⏹";
-      btn.disabled = false;
-      return;
-    }
-
-    const region = getRegionFromUrl();
-    const API_BASE = await getApiBaseUrl();
-
-    const res = await fetch(`${API_BASE}/aws/${activeAccountId}/ec2/instances/${instanceId}/stop`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ region }),
-    });
-
-    if (res.ok) {
-      showToast(`Stopping ${instanceId}`, "success");
-      btn.textContent = "⏹";
-      btn.disabled = false;
-    } else {
-      const data = await res.json();
-      showToast(data.message || "Failed to stop instance", "error");
-      btn.textContent = "⏹";
-      btn.disabled = false;
-    }
-  } catch {
-    showToast("Network error", "error");
-    btn.textContent = "⏹";
-    btn.disabled = false;
-  }
-}
-
-/**
- * Start an EC2 instance via the backend API.
- */
-async function handleStartInstance(instanceId: string, btn: HTMLButtonElement): Promise<void> {
+async function handleAction(
+  instanceId: string,
+  action: "stop" | "start",
+  btn: HTMLButtonElement,
+  doc: Document,
+): Promise<void> {
+  const originalIcon = btn.textContent;
   btn.textContent = "⏳";
   btn.disabled = true;
 
   try {
     const { accessToken, activeAccountId } = await getStoredAuth();
     if (!accessToken || !activeAccountId) {
-      showToast("Sign in and add an AWS account first", "error");
-      btn.textContent = "▶️";
+      showToast(doc, "Sign in and add an AWS account first", "error");
+      btn.textContent = originalIcon;
       btn.disabled = false;
       return;
     }
 
     const region = getRegionFromUrl();
-    const API_BASE = await getApiBaseUrl();
+    const API_BASE = "https://7ix3bp5dr3.execute-api.eu-west-2.amazonaws.com/dev/v1";
 
     const res = await fetch(
-      `${API_BASE}/aws/${activeAccountId}/ec2/instances/${instanceId}/start`,
+      `${API_BASE}/aws/${activeAccountId}/ec2/instances/${instanceId}/${action}`,
       {
         method: "POST",
         headers: {
@@ -208,39 +180,25 @@ async function handleStartInstance(instanceId: string, btn: HTMLButtonElement): 
     );
 
     if (res.ok) {
-      showToast(`Starting ${instanceId}`, "success");
-      btn.textContent = "▶️";
-      btn.disabled = false;
+      showToast(doc, `${action === "stop" ? "Stopping" : "Starting"} ${instanceId}`, "success");
     } else {
       const data = await res.json();
-      showToast(data.message || "Failed to start instance", "error");
-      btn.textContent = "▶️";
-      btn.disabled = false;
+      showToast(doc, data.message || `Failed to ${action} instance`, "error");
     }
   } catch {
-    showToast("Network error", "error");
-    btn.textContent = "▶️";
-    btn.disabled = false;
+    showToast(doc, "Network error", "error");
   }
+
+  btn.textContent = originalIcon;
+  btn.disabled = false;
 }
 
-// ============================================================
-// UTILITIES
-// ============================================================
-
 function getRegionFromUrl(): string {
-  // Try parent frame URL first (iframe may not have region in its URL)
-  try {
-    const parentUrl = window.top?.location.href || window.location.href;
-    const url = new URL(parentUrl);
-    const param = url.searchParams.get("region");
-    if (param) return param;
-    const match = url.hostname.match(/^([a-z]{2}-[a-z]+-\d)/);
-    if (match) return match[1];
-  } catch {
-    // Cross-origin — can't access parent
-  }
-  return "us-east-1";
+  const url = new URL(window.location.href);
+  const param = url.searchParams.get("region");
+  if (param) return param;
+  const match = url.hostname.match(/^([a-z]{2}-[a-z]+-\d)/);
+  return match ? match[1] : "us-east-1";
 }
 
 async function getStoredAuth(): Promise<{
@@ -257,31 +215,21 @@ async function getStoredAuth(): Promise<{
   });
 }
 
-async function getApiBaseUrl(): Promise<string> {
-  // Hardcoded for now — could be made configurable
-  return "https://7ix3bp5dr3.execute-api.eu-west-2.amazonaws.com/dev/v1";
-}
-
-function showToast(message: string, type: "success" | "error" | "info"): void {
-  // Remove existing toasts
+function showToast(doc: Document, message: string, type: "success" | "error" | "info"): void {
+  // Show toast in the main document (not iframe)
   document.querySelectorAll(".acb-toast").forEach((el) => el.remove());
-
   const toast = document.createElement("div");
   toast.className = `acb-toast acb-toast-${type}`;
   toast.textContent = message;
   document.body.appendChild(toast);
-
   setTimeout(() => {
     toast.style.animation = "acb-fade-out 0.2s ease-out forwards";
     setTimeout(() => toast.remove(), 200);
   }, 3000);
 }
 
-function injectStyles(): void {
-  if (document.getElementById("acb-styles")) return;
-  const style = document.createElement("style");
-  style.id = "acb-styles";
-  style.textContent = `
+function getStyles(): string {
+  return `
     .acb-inline-btn {
       display: inline-flex;
       align-items: center;
@@ -303,13 +251,17 @@ function injectStyles(): void {
       background: rgba(0, 0, 0, 0.08);
       border-color: rgba(0, 0, 0, 0.15);
     }
-    .acb-inline-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .acb-inline-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .acb-stop-btn:hover { background: rgba(209, 50, 18, 0.1); }
     .acb-start-btn:hover { background: rgba(29, 129, 2, 0.1); }
+  `;
+}
 
+function injectStyles(): void {
+  if (document.getElementById("acb-styles")) return;
+  const style = document.createElement("style");
+  style.id = "acb-styles";
+  style.textContent = `
     .acb-toast {
       position: fixed;
       top: 20px;
