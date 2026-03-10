@@ -5,6 +5,20 @@
  * Accesses EC2 iframe content via contentDocument (same-origin).
  */
 
+import {
+  colorBackgroundButtonNormalActive,
+  colorBackgroundButtonNormalDefault,
+  colorBackgroundButtonNormalHover,
+  colorBorderButtonNormalActive,
+  colorBorderButtonNormalDefault,
+  colorBorderButtonNormalHover,
+  colorTextButtonNormalDefault,
+  colorTextButtonNormalHover,
+  colorTextStatusError,
+  colorTextStatusSuccess,
+  fontFamilyBase,
+} from "@cloudscape-design/design-tokens";
+
 const ACB_MARKER = "acb-injected";
 
 if (document.documentElement.getAttribute(ACB_MARKER)) {
@@ -231,7 +245,6 @@ function showToast(doc: Document, message: string, type: "success" | "error" | "
 
 function getStyles(): string {
   return `
-    /* Cloudscape-style inline icon button */
     .acb-cs-btn {
       display: inline-flex;
       align-items: center;
@@ -240,12 +253,12 @@ function getStyles(): string {
       height: 30px;
       padding: 0 8px;
       margin-left: 8px;
-      border: 2px solid var(--color-border-button-normal-default, #7d8998);
+      border: 2px solid ${colorBorderButtonNormalDefault};
       border-radius: 20px;
-      background: var(--color-background-button-normal-default, transparent);
-      color: var(--color-text-button-normal-default, #0972d3);
+      background: ${colorBackgroundButtonNormalDefault};
+      color: ${colorTextButtonNormalDefault};
       cursor: pointer;
-      font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+      font-family: ${fontFamilyBase};
       font-size: 14px;
       font-weight: 700;
       line-height: 20px;
@@ -256,13 +269,13 @@ function getStyles(): string {
       white-space: nowrap;
     }
     .acb-cs-btn:hover {
-      background: var(--color-background-button-normal-hover, #f2f8fd);
-      border-color: var(--color-border-button-normal-hover, #033160);
-      color: var(--color-text-button-normal-hover, #033160);
+      background: ${colorBackgroundButtonNormalHover};
+      border-color: ${colorBorderButtonNormalHover};
+      color: ${colorTextButtonNormalHover};
     }
     .acb-cs-btn:active {
-      background: var(--color-background-button-normal-active, #d3e7f9);
-      border-color: var(--color-border-button-normal-active, #033160);
+      background: ${colorBackgroundButtonNormalActive};
+      border-color: ${colorBorderButtonNormalActive};
     }
     .acb-cs-btn:disabled {
       opacity: 0.5;
@@ -274,8 +287,8 @@ function getStyles(): string {
       line-height: 1;
     }
     .acb-stop-btn {
-      border-color: var(--color-text-status-error, #d91515);
-      color: var(--color-text-status-error, #d91515);
+      border-color: ${colorTextStatusError};
+      color: ${colorTextStatusError};
     }
     .acb-stop-btn:hover {
       background: #fdf3f1;
@@ -283,8 +296,8 @@ function getStyles(): string {
       color: #8b0000;
     }
     .acb-start-btn {
-      border-color: var(--color-text-status-success, #037f0c);
-      color: var(--color-text-status-success, #037f0c);
+      border-color: ${colorTextStatusSuccess};
+      color: ${colorTextStatusSuccess};
     }
     .acb-start-btn:hover {
       background: #f2f8f0;
