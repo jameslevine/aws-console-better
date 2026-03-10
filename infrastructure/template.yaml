@@ -47,6 +47,10 @@ Resources:
         - email
       UsernameAttributes:
         - email
+      EmailConfiguration:
+        EmailSendingAccount: DEVELOPER
+        SourceArn: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/imjamesl@amazon.co.uk
+        From: imjamesl@amazon.co.uk
       Policies:
         PasswordPolicy:
           MinimumLength: 8
