@@ -54,13 +54,13 @@
 
 | Feature                                             | Priority | Status         | Description                                                    |
 | --------------------------------------------------- | -------- | -------------- | -------------------------------------------------------------- |
-| Instance List (Cross-Region)                        | P0       | 🔴 Not Started | View all EC2 instances across all regions in one table         |
+| Instance List (Cross-Region)                        | P0       | 🟢 Complete    | View all EC2 instances across all regions. Backend API live.   |
 | Copy Instance Config to Region                      | P0       | 🔴 Not Started | Replicate an instance's launch configuration to another region |
-| Quick Actions: Start/Stop/Reboot                    | P0       | 🔴 Not Started | One-click instance state management                            |
-| Quick Copy: Instance ID, Public IP, Private IP, DNS | P0       | 🔴 Not Started | Copy key identifiers with one click                            |
-| SSH Command Generator                               | P0       | 🔴 Not Started | Generate and copy SSH command with correct key pair and IP     |
+| Quick Actions: Start/Stop/Reboot                    | P0       | 🟢 Complete    | One-click instance state management. Backend API live.         |
+| Quick Copy: Instance ID, Public IP, Private IP, DNS | P0       | 🟡 In Progress | Content script detects EC2 instances from URL.                 |
+| SSH Command Generator                               | P0       | 🟢 Complete    | Generate SSH command with key pair and IP. Backend API live.   |
 | Security Group Copy to Region                       | P0       | 🔴 Not Started | Replicate security group rules to another region               |
-| Show CLI: describe-instances                        | P0       | 🔴 Not Started | Show equivalent CLI command for current view                   |
+| Show CLI: describe-instances                        | P0       | 🟢 Complete    | CLI command included in describe response + content script.    |
 | Instance Comparison                                 | P0       | 🔴 Not Started | Compare two instances side-by-side                             |
 
 #### S3 (Simple Storage Service)
@@ -529,13 +529,16 @@
 
 ## Completed Tasks
 
-| Date       | Task                                        | Notes                                                                                                                                                                  |
-| ---------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-03-09 | Project planning and requirements gathering | Architecture and feature list defined                                                                                                                                  |
-| 2026-03-09 | Documentation created                       | All 6 docs/ files created                                                                                                                                              |
-| 2026-03-09 | Monorepo initialized                        | Git repo with extension/, backend/, infrastructure/ directories                                                                                                        |
-| 2026-03-09 | Extension project scaffolded                | Vite + CRXJS + React 18 + TypeScript + Tailwind CSS. Manifest V3.                                                                                                      |
-| 2026-03-09 | Extension shell built                       | Background service worker, content script with context detection for 6 services, popup with auth/quick actions, side panel with 4 tabs                                 |
-| 2026-03-09 | Backend project scaffolded                  | Express + TypeScript + serverless-http. AWS SDK v3 clients installed.                                                                                                  |
-| 2026-03-09 | Backend shell built                         | Cognito auth middleware, Joi validation, error handler. Routes for auth, accounts, users, history, and 6 AWS services (EC2, S3, Lambda, DynamoDB, IAM, CloudFormation) |
-| 2026-03-09 | Infrastructure template created             | SAM template with Cognito, KMS, 4 DynamoDB tables, Lambda + API Gateway, CloudWatch                                                                                    |
+| Date       | Task                                        | Notes                                                                                               |
+| ---------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 2026-03-09 | Project planning and requirements gathering | Architecture and feature list defined                                                               |
+| 2026-03-09 | Documentation created                       | All 6 docs/ files created                                                                           |
+| 2026-03-09 | Monorepo initialized                        | Git repo with extension/, backend/, infrastructure/. GitHub private repo.                           |
+| 2026-03-09 | Extension + Backend scaffolded              | Vite+CRXJS+React 18+Tailwind. Express+TypeScript+serverless-http. All routes scaffolded.            |
+| 2026-03-09 | Infrastructure deployed                     | SAM deploy to eu-west-2. Cognito, KMS, 4 DynamoDB tables, Lambda, API Gateway. API live.            |
+| 2026-03-09 | Linting + commit hooks configured           | Husky, commitlint, lint-staged, ESLint, Prettier                                                    |
+| 2026-03-09 | User auth implemented                       | Cognito SDK: register, verify, login, refresh, forgot/reset password. Joi validation.               |
+| 2026-03-09 | AWS account management implemented          | KMS encryption, DynamoDB adapter, STS verification, CRUD controller.                                |
+| 2026-03-09 | EC2 service implemented                     | List instances (cross-region), describe, start/stop/reboot, SSH command, security groups. Deployed. |
+| 2026-03-09 | Extension built and loaded in Chrome        | Popup with auth flow (login/register/verify/signout). Floating toolbar on AWS Console.              |
+| 2026-03-10 | Auth flow tested end-to-end                 | Register → email verification → login. Fixed Cognito AutoVerifiedAttributes config.                 |
