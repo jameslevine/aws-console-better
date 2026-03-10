@@ -7,15 +7,9 @@
 
 import {
   colorBackgroundButtonNormalActive,
-  colorBackgroundButtonNormalDefault,
   colorBackgroundButtonNormalHover,
-  colorBorderButtonNormalActive,
-  colorBorderButtonNormalDefault,
-  colorBorderButtonNormalHover,
   colorTextButtonNormalDefault,
   colorTextButtonNormalHover,
-  colorTextStatusError,
-  colorTextStatusSuccess,
   fontFamilyBase,
 } from "@cloudscape-design/design-tokens";
 
@@ -249,33 +243,27 @@ function getStyles(): string {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 0;
-      height: 30px;
-      padding: 0 8px;
-      margin-left: 8px;
-      border: 2px solid ${colorBorderButtonNormalDefault};
-      border-radius: 20px;
-      background: ${colorBackgroundButtonNormalDefault};
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      margin-left: 4px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
       color: ${colorTextButtonNormalDefault};
       cursor: pointer;
       font-family: ${fontFamilyBase};
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 20px;
-      letter-spacing: 0.25px;
+      font-size: 12px;
+      line-height: 1;
       vertical-align: middle;
-      transition: all 85ms linear;
-      text-decoration: none;
-      white-space: nowrap;
+      transition: background 85ms linear, color 85ms linear;
     }
     .acb-cs-btn:hover {
       background: ${colorBackgroundButtonNormalHover};
-      border-color: ${colorBorderButtonNormalHover};
       color: ${colorTextButtonNormalHover};
     }
     .acb-cs-btn:active {
       background: ${colorBackgroundButtonNormalActive};
-      border-color: ${colorBorderButtonNormalActive};
     }
     .acb-cs-btn:disabled {
       opacity: 0.5;
@@ -283,26 +271,8 @@ function getStyles(): string {
       pointer-events: none;
     }
     .acb-cs-btn-icon {
-      font-size: 14px;
+      font-size: 12px;
       line-height: 1;
-    }
-    .acb-stop-btn {
-      border-color: ${colorTextStatusError};
-      color: ${colorTextStatusError};
-    }
-    .acb-stop-btn:hover {
-      background: #fdf3f1;
-      border-color: #8b0000;
-      color: #8b0000;
-    }
-    .acb-start-btn {
-      border-color: ${colorTextStatusSuccess};
-      color: ${colorTextStatusSuccess};
-    }
-    .acb-start-btn:hover {
-      background: #f2f8f0;
-      border-color: #1a5c00;
-      color: #1a5c00;
     }
   `;
 }
