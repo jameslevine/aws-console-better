@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AWS Console Better",
-  "description": "Augment your AWS Console experience with powerful features: cross-region operations, quick copy, context-aware actions, and more.",
+  "description": "Augment your AWS Console experience with powerful features.",
   "version": "0.1.0",
   "icons": {
     "16": "src/assets/icons/icon-16.png",
@@ -31,10 +31,7 @@
       "run_at": "document_idle"
     }
   ],
-  "side_panel": {
-    "default_path": "src/sidepanel/index.html"
-  },
-  "permissions": ["storage", "activeTab", "sidePanel", "tabs"],
+  "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
     "https://*.console.aws.amazon.com/*",
     "https://*.cdn.console.awsstatic.com/*"

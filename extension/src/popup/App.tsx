@@ -1,29 +1,35 @@
 import { useEffect, useState } from "react";
 
 import { MessageType } from "@/shared/types/messages";
+import { api } from "@/shared/api/client";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/v1";
 
 type View = "loading" | "login" | "register" | "verify" | "authenticated";
 
-interface AuthState {
-  isAuthenticated: boolean;
-  email: string;
+interface AwsAccount {
+  accountId: string;
+  accountName: string;
+  awsAccountId: string;
+  defaultRegion: string;
 }
 
 export function App() {
   const [view, setView] = useState<View>("loading");
-  const [auth, setAuth] = useState<AuthState>({
-    isAuthenticated: false,
-    email: "",
-  });
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [accounts, setAccounts] = useState<AwsAccount[]>([]);
+
+  const loadAccounts = async () => {
+    const result = await api.get<{ accounts: AwsAccount[] }>("/accounts");
+    if (result.data) setAccounts(result.data.accounts);
+  };
 
   useEffect(() => {
     chrome.runtime.sendMessage({ type: MessageType.GET_AUTH_TOKEN }, (response) => {
       if (response?.success) {
-        setAuth({ isAuthenticated: true, email: "" });
         setView("authenticated");
+        loadAccounts();
       } else {
         setView("login");
       }
@@ -32,43 +38,43 @@ export function App() {
 
   if (view === "loading") {
     return (
-      <div className="flex h-[400px] w-[350px] items-center justify-center">
-        <div className="text-sm text-gray-500">Loading...</div>
+      <div className="flex h-[300px] w-[320px] items-center justify-center">
+        <span className="text-sm text-gray-500">Loading...</span>
       </div>
     );
   }
 
   return (
-    <div className="h-[450px] w-[350px] overflow-y-auto">
-      <div className="flex items-center gap-2 border-b border-gray-200 bg-[#232f3e] px-4 py-3">
-        <span className="text-lg">⚡</span>
-        <h1 className="text-base font-semibold text-white">AWS Console Better</h1>
+    <div className="w-[320px]">
+      <div className="flex items-center gap-2 bg-[#232f3e] px-4 py-2.5">
+        <span className="text-sm">⚡</span>
+        <span className="text-sm font-semibold text-white">AWS Console Better</span>
       </div>
-
       <div className="p-4">
-        {error && <div className="mb-3 rounded-lg bg-red-50 p-2 text-xs text-red-600">{error}</div>}
-
-        {view === "login" && <LoginView setView={setView} setAuth={setAuth} setError={setError} />}
+        {error && <div className="mb-3 rounded bg-red-50 p-2 text-xs text-red-600">{error}</div>}
+        {view === "login" && (
+          <LoginForm setView={setView} setError={setError} setEmail={setEmail} />
+        )}
         {view === "register" && (
-          <RegisterView setView={setView} setAuth={setAuth} setError={setError} />
+          <RegisterForm setView={setView} setError={setError} setEmail={setEmail} />
         )}
-        {view === "verify" && (
-          <VerifyView email={auth.email} setView={setView} setError={setError} />
+        {view === "verify" && <VerifyForm email={email} setView={setView} setError={setError} />}
+        {view === "authenticated" && (
+          <AuthView accounts={accounts} setView={setView} onAccountAdded={loadAccounts} />
         )}
-        {view === "authenticated" && <AuthenticatedView setView={setView} setAuth={setAuth} />}
       </div>
     </div>
   );
 }
 
-function LoginView({
+function LoginForm({
   setView,
-  setAuth,
   setError,
+  setEmail: setParentEmail,
 }: {
   setView: (v: View) => void;
-  setAuth: (a: AuthState) => void;
   setError: (e: string) => void;
+  setEmail: (e: string) => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,14 +90,11 @@ function LoginView({
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.message || "Login failed");
         setLoading(false);
         return;
       }
-
-      // Store tokens via background service worker
       chrome.runtime.sendMessage({
         type: MessageType.SET_AUTH_TOKEN,
         payload: {
@@ -100,28 +103,22 @@ function LoginView({
           expiresIn: data.expiresIn,
         },
       });
-
-      setAuth({ isAuthenticated: true, email });
       setView("authenticated");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Network error");
     }
     setLoading(false);
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-900">Sign In</h2>
-        <p className="mt-1 text-xs text-gray-500">Sign in to your AWS Console Better account</p>
-      </div>
-
+      <h2 className="text-center text-base font-semibold">Sign In</h2>
       <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:outline-none"
+        className="rounded border border-gray-300 px-3 py-2 text-sm"
       />
       <input
         type="password"
@@ -129,38 +126,37 @@ function LoginView({
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:outline-none"
+        className="rounded border border-gray-300 px-3 py-2 text-sm"
       />
-
       <button
         onClick={handleLogin}
         disabled={loading || !email || !password}
-        className="rounded-lg bg-[#ff9900] px-4 py-2.5 text-sm font-semibold text-[#232f3e] transition-colors hover:bg-[#ec7211] disabled:opacity-50"
+        className="rounded bg-[#ff9900] py-2 text-sm font-semibold text-[#232f3e] disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>
-
       <button
         onClick={() => {
           setError("");
+          setParentEmail("");
           setView("register");
         }}
         className="text-xs text-[#0073bb] hover:underline"
       >
-        Don't have an account? Create one
+        Create account
       </button>
     </div>
   );
 }
 
-function RegisterView({
+function RegisterForm({
   setView,
-  setAuth,
   setError,
+  setEmail: setParentEmail,
 }: {
   setView: (v: View) => void;
-  setAuth: (a: AuthState) => void;
   setError: (e: string) => void;
+  setEmail: (e: string) => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -178,42 +174,36 @@ function RegisterView({
         body: JSON.stringify({ email, password, firstName, lastName }),
       });
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.message || "Registration failed");
         setLoading(false);
         return;
       }
-
-      setAuth({ isAuthenticated: false, email });
+      setParentEmail(email);
       setView("verify");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Network error");
     }
     setLoading(false);
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-900">Create Account</h2>
-        <p className="mt-1 text-xs text-gray-500">Sign up for AWS Console Better</p>
-      </div>
-
+      <h2 className="text-center text-base font-semibold">Create Account</h2>
       <div className="flex gap-2">
         <input
           type="text"
           placeholder="First name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:outline-none"
+          className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
         />
         <input
           type="text"
           placeholder="Last name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:outline-none"
+          className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
         />
       </div>
       <input
@@ -221,24 +211,22 @@ function RegisterView({
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:outline-none"
+        className="rounded border border-gray-300 px-3 py-2 text-sm"
       />
       <input
         type="password"
-        placeholder="Password (min 8 chars, upper, lower, number, symbol)"
+        placeholder="Password (8+ chars, upper, lower, number, symbol)"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:outline-none"
+        className="rounded border border-gray-300 px-3 py-2 text-sm"
       />
-
       <button
         onClick={handleRegister}
         disabled={loading || !email || !password || !firstName || !lastName}
-        className="rounded-lg bg-[#ff9900] px-4 py-2.5 text-sm font-semibold text-[#232f3e] transition-colors hover:bg-[#ec7211] disabled:opacity-50"
+        className="rounded bg-[#ff9900] py-2 text-sm font-semibold text-[#232f3e] disabled:opacity-50"
       >
-        {loading ? "Creating account..." : "Create Account"}
+        {loading ? "Creating..." : "Create Account"}
       </button>
-
       <button
         onClick={() => {
           setError("");
@@ -246,13 +234,13 @@ function RegisterView({
         }}
         className="text-xs text-[#0073bb] hover:underline"
       >
-        Already have an account? Sign in
+        Back to sign in
       </button>
     </div>
   );
 }
 
-function VerifyView({
+function VerifyForm({
   email,
   setView,
   setError,
@@ -274,45 +262,38 @@ function VerifyView({
         body: JSON.stringify({ email, code }),
       });
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.message || "Verification failed");
         setLoading(false);
         return;
       }
-
       setView("login");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Network error");
     }
     setLoading(false);
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-900">Verify Email</h2>
-        <p className="mt-1 text-xs text-gray-500">Enter the 6-digit code sent to {email}</p>
-      </div>
-
+      <h2 className="text-center text-base font-semibold">Verify Email</h2>
+      <p className="text-center text-xs text-gray-500">Code sent to {email}</p>
       <input
         type="text"
-        placeholder="Verification code"
+        placeholder="6-digit code"
         value={code}
         onChange={(e) => setCode(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleVerify()}
         maxLength={6}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-center text-lg tracking-widest focus:border-[#ff9900] focus:outline-none"
+        className="rounded border border-gray-300 px-3 py-2 text-center text-lg tracking-widest"
       />
-
       <button
         onClick={handleVerify}
         disabled={loading || code.length !== 6}
-        className="rounded-lg bg-[#ff9900] px-4 py-2.5 text-sm font-semibold text-[#232f3e] transition-colors hover:bg-[#ec7211] disabled:opacity-50"
+        className="rounded bg-[#ff9900] py-2 text-sm font-semibold text-[#232f3e] disabled:opacity-50"
       >
         {loading ? "Verifying..." : "Verify"}
       </button>
-
       <button
         onClick={() => {
           setError("");
@@ -326,68 +307,158 @@ function VerifyView({
   );
 }
 
-function AuthenticatedView({
+function AuthView({
+  accounts,
   setView,
-  setAuth,
+  onAccountAdded,
 }: {
+  accounts: AwsAccount[];
   setView: (v: View) => void;
-  setAuth: (a: AuthState) => void;
+  onAccountAdded: () => void;
 }) {
-  const openSidePanel = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.sidePanel.open({ tabId: tabs[0].id });
-      }
-    });
-  };
+  const [showAdd, setShowAdd] = useState(false);
 
   const handleSignOut = () => {
     chrome.runtime.sendMessage({ type: MessageType.CLEAR_AUTH_TOKEN });
-    setAuth({ isAuthenticated: false, email: "" });
     setView("login");
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <div>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-          Quick Actions
-        </h3>
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={openSidePanel}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50"
-          >
-            <span>📋</span>
-            <span>Open Side Panel</span>
-          </button>
-          <button className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50">
-            <span>🌍</span>
-            <span>Cross-Region View</span>
-          </button>
-          <button className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50">
-            <span>📜</span>
-            <span>Action History</span>
-          </button>
+      {/* AWS Accounts */}
+      <h3 className="text-xs font-semibold uppercase text-gray-500">AWS Accounts</h3>
+      {accounts.map((acc) => (
+        <div key={acc.accountId} className="rounded border border-gray-200 p-2">
+          <p className="text-sm font-medium">{acc.accountName}</p>
+          <p className="text-xs text-gray-500">
+            {acc.awsAccountId} · {acc.defaultRegion}
+          </p>
         </div>
-      </div>
+      ))}
 
-      <div>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-          AWS Account
-        </h3>
-        <div className="rounded-lg border border-gray-200 px-3 py-2">
-          <p className="text-sm font-medium text-gray-900">No account linked</p>
-          <p className="text-xs text-gray-500">Add an AWS account in settings</p>
-        </div>
-      </div>
+      {showAdd ? (
+        <AddAccountForm
+          onSuccess={() => {
+            setShowAdd(false);
+            onAccountAdded();
+          }}
+          onCancel={() => setShowAdd(false)}
+        />
+      ) : (
+        <button
+          onClick={() => setShowAdd(true)}
+          className="rounded border-2 border-dashed border-gray-300 py-2 text-sm text-gray-500 hover:border-[#ff9900] hover:text-[#ff9900]"
+        >
+          + Add AWS Account
+        </button>
+      )}
 
+      {/* Sign Out */}
       <button
         onClick={handleSignOut}
-        className="mt-2 rounded-lg border border-red-200 px-4 py-2 text-center text-xs text-red-600 transition-colors hover:bg-red-50"
+        className="mt-2 rounded border border-red-200 py-1.5 text-xs text-red-600 hover:bg-red-50"
       >
         Sign Out
       </button>
+      <p className="text-center text-xs text-gray-400">v0.1.0</p>
+    </div>
+  );
+}
+
+function AddAccountForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
+  const [name, setName] = useState("");
+  const [keyId, setKeyId] = useState("");
+  const [secret, setSecret] = useState("");
+  const [region, setRegion] = useState("eu-west-2");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async () => {
+    setError("");
+    setLoading(true);
+    const result = await api.post("/accounts", {
+      accountName: name,
+      accessKeyId: keyId,
+      secretAccessKey: secret,
+      defaultRegion: region,
+      isDefault: true,
+    });
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+      return;
+    }
+    onSuccess();
+  };
+
+  const regions = [
+    "us-east-1",
+    "us-east-2",
+    "us-west-1",
+    "us-west-2",
+    "eu-west-1",
+    "eu-west-2",
+    "eu-west-3",
+    "eu-central-1",
+    "eu-north-1",
+    "ap-southeast-1",
+    "ap-southeast-2",
+    "ap-northeast-1",
+    "ap-northeast-2",
+    "ap-south-1",
+    "sa-east-1",
+    "ca-central-1",
+  ];
+
+  return (
+    <div className="rounded border border-[#ff9900] bg-orange-50 p-3">
+      <h4 className="mb-2 text-sm font-semibold">Add AWS Account</h4>
+      {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
+      <div className="flex flex-col gap-2">
+        <input
+          placeholder="Account name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="rounded border px-2 py-1.5 text-xs"
+        />
+        <input
+          placeholder="Access Key ID (AKIA...)"
+          value={keyId}
+          onChange={(e) => setKeyId(e.target.value)}
+          className="rounded border px-2 py-1.5 font-mono text-xs"
+        />
+        <input
+          type="password"
+          placeholder="Secret Access Key"
+          value={secret}
+          onChange={(e) => setSecret(e.target.value)}
+          className="rounded border px-2 py-1.5 font-mono text-xs"
+        />
+        <select
+          value={region}
+          onChange={(e) => setRegion(e.target.value)}
+          className="rounded border px-2 py-1.5 text-xs"
+        >
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !name || !keyId || !secret}
+            className="flex-1 rounded bg-[#ff9900] py-1.5 text-xs font-semibold text-[#232f3e] disabled:opacity-50"
+          >
+            {loading ? "Adding..." : "Add Account"}
+          </button>
+          <button onClick={onCancel} className="rounded border px-3 py-1.5 text-xs text-gray-600">
+            Cancel
+          </button>
+        </div>
+        <p className="text-xs text-gray-400">Credentials encrypted with KMS.</p>
+      </div>
     </div>
   );
 }
