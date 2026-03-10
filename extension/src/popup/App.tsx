@@ -22,7 +22,13 @@ export function App() {
 
   const loadAccounts = async () => {
     const result = await api.get<{ accounts: AwsAccount[] }>("/accounts");
-    if (result.data) setAccounts(result.data.accounts);
+    if (result.data) {
+      setAccounts(result.data.accounts);
+      // Set the first account as active if none is set
+      if (result.data.accounts.length > 0) {
+        chrome.storage.local.set({ activeAccountId: result.data.accounts[0].accountId });
+      }
+    }
   };
 
   useEffect(() => {
