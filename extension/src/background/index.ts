@@ -16,10 +16,7 @@ import {
  * - API calls to the backend
  */
 
-// Open side panel when extension icon is clicked (if popup is not shown)
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(console.error);
-
-// Listen for messages from content scripts, popup, and side panel
+// Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse: (response: ExtensionResponse) => void) => {
     handleMessage(message)
@@ -35,14 +32,9 @@ chrome.runtime.onMessage.addListener(
 );
 
 // Handle tab updates to detect AWS Console navigation
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url?.includes("console.aws.amazon.com")) {
-    // Enable side panel for AWS Console tabs
-    chrome.sidePanel.setOptions({
-      tabId,
-      path: "src/sidepanel/index.html",
-      enabled: true,
-    });
+    // AWS Console tab detected — future enhancements can go here
   }
 });
 
