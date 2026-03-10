@@ -25,8 +25,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.console.aws.amazon.com/*"],
+      "matches": ["https://*.console.aws.amazon.com/*", "https://*.cdn.console.awsstatic.com/*"],
       "js": ["src/content/index.tsx"],
+      "all_frames": true,
       "run_at": "document_idle"
     }
   ],
@@ -34,7 +35,10 @@
     "default_path": "src/sidepanel/index.html"
   },
   "permissions": ["storage", "activeTab", "sidePanel", "tabs"],
-  "host_permissions": ["https://*.console.aws.amazon.com/*"],
+  "host_permissions": [
+    "https://*.console.aws.amazon.com/*",
+    "https://*.cdn.console.awsstatic.com/*"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   }
